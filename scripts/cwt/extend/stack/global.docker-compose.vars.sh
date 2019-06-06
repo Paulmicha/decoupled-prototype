@@ -11,10 +11,6 @@
 # @see cwt/bootstrap.sh
 #
 
-# Generate and write the docker-compose.yml file in project docroot.
-global DC_MODE 'generate'
-global DC_YML_VARIANTS "$INSTANCE_TYPE $HOST_TYPE"
-
 # The node container's "start" command depends on the local instance type.
 # Convention : name the command after INSTANCE_TYPE value (i.e. dev, stage, or
 # prod).
