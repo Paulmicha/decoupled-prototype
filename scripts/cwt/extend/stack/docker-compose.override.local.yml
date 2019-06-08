@@ -1,0 +1,14 @@
+version: "3"
+services:
+
+  node:
+    ports:
+      - "3000:3000"
+
+  nginx:
+    ports:
+      - "80:80"
+
+  hasura:
+    ports:
+      - "8080:8080"

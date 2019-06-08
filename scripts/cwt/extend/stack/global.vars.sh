@@ -11,10 +11,28 @@
 # @see cwt/bootstrap.sh
 #
 
-# The node container's "start" command depends on the local instance type.
-# Convention : name the command after INSTANCE_TYPE value (i.e. dev, stage, or
-# prod).
-global NODE_COMMAND "sh -c 'npm install && npm run $INSTANCE_TYPE'"
+# DB credentials for local dev.
+global DB_HOST='postgres'
+global DB_DRIVER='pgsql'
+global DB_NAME='app'
+global DB_USER='app'
+
+# On remote instances, DB credentials should be prepended when executing
+# commands in order to avoid having them written unencrypted in local files,
+# such as '.env'.
+case "${HOST_TYPE}" in 'local')
+  global DB_PASSWORD='app'
+  global DB_ROOT_PASSWORD='app'
+  global HASURA_GRAPHQL_ADMIN_SECRET='secret'
+esac
+
+# The node container's "start" command depends on the local instance type + host
+# type.
+npm_run='start'
+case "${HOST_TYPE}.${INSTANCE_TYPE}" in 'local.dev')
+  npm_run='dev'
+esac
+global NODE_COMMAND "sh -c 'npm install && npm run $npm_run'"
 
 # Use latest images as of 2019/06/04.
 # See https://github.com/wodby/docker4php/blob/master/.env
@@ -27,12 +45,3 @@ global ADMINER_TAG='4-3.5.12'
 # global ATHENAPDF_TAG='2.10.0'
 # global RSYSLOG_TAG='latest'
 # global WEBGRIND_TAG='1.5-1.9.12'
-
-# Dump DB credentials for local dev.
-# TODO [prod-check] Proper DB credentials management.
-global DB_HOST='postgres'
-global DB_DRIVER='pgsql'
-global DB_NAME='app'
-global DB_USER='app'
-global DB_PASSWORD='app'
-global DB_ROOT_PASSWORD='app'

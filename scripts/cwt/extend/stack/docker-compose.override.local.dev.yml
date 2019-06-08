@@ -1,0 +1,29 @@
+version: "3"
+services:
+
+  node:
+    ports:
+      - "3000:3000"
+
+  nginx:
+    ports:
+      - "80:80"
+
+  hasura:
+    ports:
+      - "8080:8080"
+
+  adminer:
+    image: wodby/adminer:$ADMINER_TAG
+    environment:
+      ADMINER_DEFAULT_DB_DRIVER: $DB_DRIVER
+      ADMINER_DEFAULT_DB_HOST: $DB_HOST
+      ADMINER_DEFAULT_DB_NAME: $DB_NAME
+    ports:
+      - "9000:9000"
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025" # HTTP (UI)
+      # - "1025:1025" # SMTP (no exposition needed)

@@ -1,24 +1,25 @@
 version: "3"
 services:
 
-
-  #
-  # 1. App stack.
-  #
-
   # See https://github.com/wodby/node
   node:
     image: wodby/node:$NODE_TAG
+    container_name: "${DC_NS}_node"
+    depends_on:
+      - "nginx"
     working_dir: /app
     command: $NODE_COMMAND
     volumes:
       - ./app:/app
-    ports:
-      - "3000:3000"
+    labels:
+      - 'traefik.backend=${DC_NS}_node'
+      - 'traefik.port=3000'
+      - 'traefik.frontend.rule=Host:${INSTANCE_DOMAIN}'
 
   # See https://github.com/wodby/nginx
   nginx:
     image: wodby/nginx:$NGINX_TAG
+    container_name: "${DC_NS}_nginx"
     depends_on:
       - php
     environment:
@@ -29,8 +30,10 @@ services:
       NGINX_SERVER_ROOT: /var/www/html/public
     volumes:
       - ./app:/var/www/html
-    ports:
-      - "80:80"
+    labels:
+      - 'traefik.backend=${DC_NS}_nginx'
+      - 'traefik.port=80'
+      - 'traefik.frontend.rule=Host:backend.${INSTANCE_DOMAIN}'
 
   # See https://github.com/wodby/php
   php:
@@ -49,6 +52,21 @@ services:
     volumes:
       - ./app:/var/www/html
 
+  # See https://github.com/hasura/graphql-engine/tree/master/install-manifests/docker-compose
+  hasura:
+    image: hasura/graphql-engine:v1.0.0-beta.2
+    container_name: "${DC_NS}_hasura"
+    depends_on:
+      - "postgres"
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: $HASURA_GRAPHQL_ADMIN_SECRET
+    labels:
+      - 'traefik.backend=${DC_NS}_hasura'
+      - 'traefik.port=8080'
+      - 'traefik.frontend.rule=Host:backend.${INSTANCE_DOMAIN}'
+
   # See https://github.com/wodby/postgres
   postgres:
     image: wodby/postgres:$POSTGRES_TAG
@@ -59,34 +77,3 @@ services:
       POSTGRES_PASSWORD: $DB_PASSWORD
     volumes:
       - ./data/db/default:/var/lib/postgresql/data
-
-  graphql-engine:
-    image: hasura/graphql-engine:v1.0.0-beta.2
-    depends_on:
-      - "postgres"
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-    ports:
-      - "8080:8080"
-
-
-  #
-  # 2. Dev tools.
-  #
-
-  adminer:
-    image: wodby/adminer:$ADMINER_TAG
-    environment:
-      ADMINER_DEFAULT_DB_DRIVER: $DB_DRIVER
-      ADMINER_DEFAULT_DB_HOST: $DB_HOST
-      ADMINER_DEFAULT_DB_NAME: $DB_NAME
-    ports:
-      - "9000:9000"
-
-  mailhog:
-    image: mailhog/mailhog
-    ports:
-      - "8025:8025" # HTTP (UI)
-      # - "1025:1025" # SMTP (no exposition needed)
