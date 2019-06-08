@@ -47,15 +47,15 @@ echo "(Re)initializing $host_type instance (type : $instance_type) using $provis
 
 # TODO [wip] separate Git repo for app ?
 cwt/instance/init.sh \
-  # -a "$PWD/app/web" \
   -a "$PWD/app" \
   -t "$instance_type" \
   -h "$host_type" \
   -p "$provision_using" \
   -d "$instance_domain" \
+  -y
+  # -a "$PWD/app/web" \
   # -g 'TODO git repo using sh ?' \
   # -i "$PWD/app" \
-  -y
 
 if [[ $? -ne 0 ]]; then
   echo >&2
