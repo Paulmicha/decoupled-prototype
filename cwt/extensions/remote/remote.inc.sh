@@ -341,6 +341,7 @@ EOF
     local docroot
     local ssh_user
     local ssh_use_agent_filter
+    local ssh_pubkey
 
     for remote_id in "${CWTRI__ROOTS[@]}"; do
       var_prefix="CWTRI_${remote_id}"
@@ -358,21 +359,29 @@ EOF
       v="${var_prefix}_SSH_USE_AGENT_FILTER"
       ssh_use_agent_filter="${!v}"
       # echo "$remote_id.ssh_use_agent_filter = '$ssh_use_agent_filter' ($v)"
+      v="${var_prefix}_SSH_PUBKEY"
+      ssh_pubkey="${!v}"
+      # echo "$remote_id.ssh_pubkey = '$ssh_pubkey' ($v)"
 
       if [[ -n "$ssh_use_agent_filter" ]]; then
-        if [[ -n "$CWT_SSH_PUBKEY" ]]; then
+        # We can't setup SSH connection command without a path to a public key.
+        if [[ -z "$ssh_pubkey" ]] && [[ -z "$CWT_SSH_PUBKEY" ]]; then
+          echo >&2
+          echo "Error in u_remote_instances_setup() - $BASH_SOURCE line $LINENO: missing CWT_SSH_PUBKEY env var." >&2
+          echo "-> Aborting (1)." >&2
+          echo >&2
+          exit 1
+        else
+          # Use the public key path set in YAML file or fallback to env. var.
+          if [[ -z "$ssh_pubkey" ]]; then
+            ssh_pubkey="$CWT_SSH_PUBKEY"
+          fi
           u_remote_instance_add \
             "$remote_id" \
             "$host" \
             "$docroot" \
             "$ssh_user" \
-            "afssh -f $(u_remote_get_pubkey_hex_md5_fingerprint $CWT_SSH_PUBKEY) -- -T $ssh_user@$host"
-        else
-          echo >&2
-          echo "Error in u_remote_instances_setup() - $BASH_SOURCE line $LINENO: missing CWT_SSH_PUBKEY env var." >&2
-          echo "-> Aborting (1)." >&2
-          echo >&2
-          return 1
+            "afssh -f $(u_remote_get_pubkey_hex_md5_fingerprint $ssh_pubkey) -- -T $ssh_user@$host"
         fi
       else
         u_remote_instance_add \

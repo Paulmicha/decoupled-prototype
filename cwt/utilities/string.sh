@@ -35,6 +35,9 @@
 #   CONF__ROOTS+="list"
 #   CONF__ROOTS+="alias"
 #
+#   # For a comprehensive usage example,
+#   # @see u_remote_instances_setup() in cwt/extensions/remote/remote.inc.sh
+#
 u_str_yaml_parse() {
   local p_yml_file="$1"
   local p_prefix="$2"
