@@ -1,0 +1,17 @@
+dev:
+  host: decoupled-prototype.lan-0-31.io
+  docroot: /var/www/decoupled-prototype.lan-0-31.io
+  ssh_user: paul
+  ssh_use_agent_filter: true
+
+test:
+  host: test.decoupled-prototype.io
+  docroot: /var/www/test.decoupled-prototype.io
+  ssh_user: mo
+  ssh_use_agent_filter: true
+
+prod:
+  host: decoupled-prototype.io
+  docroot: /var/www/decoupled-prototype.io
+  ssh_user: mo
+  ssh_use_agent_filter: true

@@ -9,6 +9,10 @@ services:
     ports:
       - "80:80"
 
+  php:
+    environment:
+      PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
+
   hasura:
     ports:
       - "8080:8080"

@@ -48,7 +48,6 @@ services:
       DB_PASSWORD: $DB_PASSWORD
       PHP_FPM_USER: app
       PHP_FPM_GROUP: app
-      PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
     volumes:
       - ./app:/var/www/html
 

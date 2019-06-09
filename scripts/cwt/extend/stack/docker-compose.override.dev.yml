@@ -1,6 +1,10 @@
 version: "3"
 services:
 
+  php:
+    environment:
+      PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
+
   adminer:
     image: wodby/adminer:$ADMINER_TAG
     container_name: "${DC_NS}_adminer"
