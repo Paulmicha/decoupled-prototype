@@ -46,8 +46,6 @@ services:
       DB_NAME: $DB_NAME
       DB_USER: $DB_USER
       DB_PASSWORD: $DB_PASSWORD
-      PHP_FPM_USER: app
-      PHP_FPM_GROUP: app
     volumes:
       - ./app:/var/www/html
 
