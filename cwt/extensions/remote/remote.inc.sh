@@ -292,7 +292,18 @@ u_remote_exec_wrapper() {
 }
 
 ##
-# Setup all remote instances at once using YAML declarations.
+# Setup all remote instances at once using YAML file hook: remote_instances.yml
+#
+# Only the most specific file will be used. This allows to restrict the
+# possibility to execute remote calls from certain instances (i.e. non-local
+# and/or per instance type).
+#
+# Prerequisite : in order to use the option 'ssh_use_agent_filter', the
+# package 'ssh-agent-filter' must be installed on your local machine.
+# @prereq https://git.tiwe.de/ssh-agent-filter.git
+#
+# To list all the possible paths that can be used, use :
+# $ make hook-debug a:remote_instances c:yml v:HOST_TYPE INSTANCE_TYPE
 #
 u_remote_instances_setup() {
   hook_most_specific_dry_run_match=''
@@ -363,6 +374,9 @@ EOF
       ssh_pubkey="${!v}"
       # echo "$remote_id.ssh_pubkey = '$ssh_pubkey' ($v)"
 
+      # This option requires installing the package ssh-agent-filter on your
+      # local machine.
+      # See https://git.tiwe.de/ssh-agent-filter.git
       if [[ -n "$ssh_use_agent_filter" ]]; then
         # We can't setup SSH connection command without a path to a public key.
         if [[ -z "$ssh_pubkey" ]] && [[ -z "$CWT_SSH_PUBKEY" ]]; then
