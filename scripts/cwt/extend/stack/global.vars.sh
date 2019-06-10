@@ -13,6 +13,7 @@
 
 # DB credentials for local dev.
 global DB_HOST 'postgres'
+global DB_PORT '5432'
 global DB_DRIVER 'pgsql'
 global DB_NAME 'app'
 global DB_USER 'app'

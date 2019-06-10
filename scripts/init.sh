@@ -45,7 +45,6 @@ fi
 echo
 echo "(Re)initializing $host_type instance (type : $instance_type) using $provision_using ..."
 
-# TODO [wip] separate Git repo for app ?
 cwt/instance/init.sh \
   -a "$PWD/app" \
   -t "$instance_type" \

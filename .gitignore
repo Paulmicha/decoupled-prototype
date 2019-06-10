@@ -6,7 +6,7 @@
 # See https://github.com/Paulmicha/common-web-tools
 #
 
-# TODO [wip] Application docroot using a separate Git repo ?
+# Application docroot using a separate Git repo.
 /app
 
 # Local environment global variables and other generated files.
