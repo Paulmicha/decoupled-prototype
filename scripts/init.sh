@@ -52,7 +52,6 @@ cwt/instance/init.sh \
   -h "$host_type" \
   -p "$provision_using" \
   -d "$instance_domain" \
-  # -g 'https://github.com/Paulmicha/contenta_sapper.git' \
   -g 'git@github.com:Paulmicha/contenta_sapper.git' \
   -i "$PWD/app" \
   -y
