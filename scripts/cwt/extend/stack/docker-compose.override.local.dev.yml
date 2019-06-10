@@ -4,6 +4,7 @@ services:
   node:
     ports:
       - "3000:3000"
+      - "10000:10000"
 
   nginx:
     ports:
