@@ -6,8 +6,8 @@ services:
     image: wodby/node:$NODE_TAG
     container_name: "${DC_NS}_node"
     depends_on:
-      - "nginx"
-    working_dir: /app
+      - "php"
+    working_dir: /app/frontend
     command: sh -c 'npm install && npm run ${NODE_RUN_ON_START}'
     volumes:
       - ./app:/app
@@ -27,17 +27,19 @@ services:
       NGINX_ERROR_LOG_LEVEL: debug
       NGINX_BACKEND_HOST: php
       NGINX_VHOST_PRESET: php
-      NGINX_SERVER_ROOT: /var/www/html/public
+      NGINX_SERVER_ROOT: /var/www/html/web
     volumes:
-      - ./app:/var/www/html
+      - ./app/backend:/var/www/html
     labels:
       - 'traefik.backend=${DC_NS}_nginx'
       - 'traefik.port=80'
       - 'traefik.frontend.rule=Host:backend.${INSTANCE_DOMAIN}'
 
   # See https://github.com/wodby/php
+  # See https://github.com/wodby/drupal-php
   php:
-    image: wodby/php:$PHP_TAG
+    # image: wodby/php:$PHP_TAG
+    image: wodby/drupal-php:$PHP_TAG
     depends_on:
       - "postgres"
     environment:
@@ -46,8 +48,9 @@ services:
       DB_NAME: $DB_NAME
       DB_USER: $DB_USER
       DB_PASSWORD: $DB_PASSWORD
+      COLUMNS: 80
     volumes:
-      - ./app:/var/www/html
+      - ./app/backend:/var/www/html
 
   # See https://github.com/hasura/graphql-engine/tree/master/install-manifests/docker-compose
   hasura:
@@ -74,3 +77,6 @@ services:
       POSTGRES_PASSWORD: $DB_PASSWORD
     volumes:
       - ./data/db/default:/var/lib/postgresql/data
+
+  redis:
+    image: wodby/redis:$REDIS_TAG

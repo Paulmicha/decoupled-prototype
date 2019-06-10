@@ -9,26 +9,21 @@ scripts/init.sh && \
   make start
 ```
 
-Result :
+Result (local dev defaults) :
 
-- App : http://localhost
-- [Hasura](https://hasura.io/) (GraphQL on Postgres) : http://localhost:8080
-
-<!--
-## Stack
-
-- Php 7.3 : [wodby/php](https://github.com/wodby/php)
-- PostgreSQL 11 : [wodby/postgres](https://github.com/wodby/postgres)
-- [Svelte](https://svelte.dev/) 3
--->
+- App (NodeJS / [Sapper](https://sapper.svelte.dev/)) : http://localhost:3000
+- Backend (Php / Drupal "[Contenta CMS](http://www.contentacms.org)" distro) : http://localhost
+- Adminer (utility: DB UI) : http://localhost:9000
+- Mailhog (utility: email catcher) : http://localhost:8025
+- [Hasura](https://hasura.io/) (utility: GraphQL UI) : http://localhost:8080
 
 ## File structure
 
 ```txt
 /path/to/my-project/    ← Dev stack dir ($PROJECT_DOCROOT)
-  ├── app/              ← The webapp ($APP_DOCROOT = $APP_GIT_WORK_TREE)
-  │   ├── src/          ← Application code
-  │   └── static/       ← Web server static files dir
+  ├── app/              ← The webapp separate Git repo ($APP_DOCROOT = $APP_GIT_WORK_TREE)
+  │   ├── backend/      ← Contenta CMS Drupal distro
+  │   └── frontend/     ← Sapper NodeJS app
   ├── cwt/              ← CWT "core" source files. Update = delete + replace entire folder
   │   ├── ...
   │   ├── extensions/   ← Generic CWT extensions (opt-out : see .cwt_extensions_ignore)

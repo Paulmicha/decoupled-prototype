@@ -34,14 +34,12 @@ case "${HOST_TYPE}.${INSTANCE_TYPE}" in 'local.dev')
 esac
 global NODE_RUN_ON_START "$npm_run"
 
-# Use latest images as of 2019/06/04.
+# Use latest images as of 2019/06/10.
 # See https://github.com/wodby/docker4php/blob/master/.env
+# See https://github.com/wodby/docker4drupal/blob/master/.env
 global POSTGRES_TAG '11-1.6.3'
-global NODE_TAG '12-0.16.0'
-# global PHP_TAG '5.6-dev-4.11.12'
-global PHP_TAG '7.3-dev-4.11.12'
-global NGINX_TAG '1.15-5.3.0'
+global NODE_TAG '12-0.17.0'
+global PHP_TAG '7.3-dev-4.12.12'
+global NGINX_TAG '1.17-5.5.0'
+global REDIS_TAG '4-3.0.8'
 global ADMINER_TAG '4-3.5.12'
-# global ATHENAPDF_TAG '2.10.0'
-# global RSYSLOG_TAG 'latest'
-# global WEBGRIND_TAG '1.5-1.9.12'
