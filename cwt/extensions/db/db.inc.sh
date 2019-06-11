@@ -15,10 +15,10 @@
 # @exports DB_HOST - defaults to 'localhost'.
 # @exports DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
 # @exports DB_NAME - defaults to "$DB_ID".
-# @exports DB_USERNAME - defaults to first 16 characters of DB_ID.
-# @exports DB_PASSWORD - defaults to 14 random characters.
-# @exports DB_ADMIN_USERNAME - defaults to DB_USERNAME.
-# @exports DB_ADMIN_PASSWORD - defaults to DB_PASSWORD.
+# @exports DB_USER - defaults to first 16 characters of DB_ID.
+# @exports DB_PASS - defaults to 14 random characters.
+# @exports DB_ADMIN_USER - defaults to DB_USER.
+# @exports DB_ADMIN_PASS - defaults to DB_PASS.
 # @exports DB_TABLES_SKIP_DATA - defaults to an empty string.
 #
 # @requires the following globals in calling scope :
@@ -90,16 +90,17 @@ u_db_get_credentials() {
 
   case "$CWT_DB_MODE" in
     # Some environments do not require CWT to handle DB credentials at all.
-    # In these cases, the following local env vars should be manually provided :
+    # In these cases, the following global env vars should be provided in
+    # calling scope :
     # - $DB_NAME
-    # - $DB_USERNAME
-    # - $DB_PASSWORD
+    # - $DB_USER
+    # - $DB_PASS
     # These fallback values are provided if not set :
     # - $DB_DRIVER defaults to mysql
     # - $DB_HOST defaults to localhost
     # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
-    # - $DB_ADMIN_USERNAME defaults to $DB_USERNAME
-    # - $DB_ADMIN_PASSWORD defaults to $DB_PASSWORD
+    # - $DB_ADMIN_USER defaults to $DB_USER
+    # - $DB_ADMIN_PASS defaults to $DB_PASS
     # - $DB_TABLES_SKIP_DATA defaults to an empty string
     none)
       if [[ -z "$DB_DRIVER" ]]; then
@@ -114,11 +115,11 @@ u_db_get_credentials() {
           *)        export DB_PORT='3306' ;;
         esac
       fi
-      if [[ -z "$DB_ADMIN_USERNAME" ]]; then
-        export DB_ADMIN_USERNAME="$DB_USERNAME"
+      if [[ -z "$DB_ADMIN_USER" ]]; then
+        export DB_ADMIN_USER="$DB_USER"
       fi
-      if [[ -z "$DB_ADMIN_PASSWORD" ]]; then
-        export DB_ADMIN_PASSWORD="$DB_PASSWORD"
+      if [[ -z "$DB_ADMIN_PASS" ]]; then
+        export DB_ADMIN_PASS="$DB_PASS"
       fi
       if [[ -z "$DB_TABLES_SKIP_DATA" ]]; then
         export DB_TABLES_SKIP_DATA=""
@@ -132,11 +133,11 @@ u_db_get_credentials() {
     # env vars are already set in calling scope :
     # - $DB_DRIVER defaults to mysql
     # - $DB_NAME defaults to $DB_ID
-    # - $DB_USERNAME defaults to $DB_ID
+    # - $DB_USER defaults to $DB_ID
     # - $DB_HOST defaults to localhost
     # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
-    # - $DB_ADMIN_USERNAME defaults to $DB_USERNAME
-    # - $DB_ADMIN_PASSWORD defaults to $DB_PASSWORD
+    # - $DB_ADMIN_USER defaults to $DB_USER
+    # - $DB_ADMIN_PASS defaults to $DB_PASS
     # - $DB_TABLES_SKIP_DATA defaults to an empty string
     auto)
       if [[ -z "$DB_DRIVER" ]]; then
@@ -145,15 +146,15 @@ u_db_get_credentials() {
       if [[ -z "$DB_NAME" ]]; then
         export DB_NAME="$DB_ID"
       fi
-      if [[ -z "$DB_USERNAME" ]]; then
-        export DB_USERNAME="$DB_ID"
+      if [[ -z "$DB_USER" ]]; then
+        export DB_USER="$DB_ID"
         # Limit automatically generated user name to 16 or 32 characters,
         # depending on the driver used by current database ID. Prevents errors
         # like "MySQL ERROR 1470 (HY000) String is too long for user name".
         # Warning : this creates naming collision risks (considered edge case).
         case "$DB_DRIVER" in
-          postgres) DB_USERNAME="${DB_USERNAME:0:32}" ;;
-          mysql)    DB_USERNAME="${DB_USERNAME:0:16}" ;;
+          postgres) DB_USER="${DB_USER:0:32}" ;;
+          mysql)    DB_USER="${DB_USER:0:16}" ;;
         esac
       fi
       if [[ -z "$DB_HOST" ]]; then
@@ -175,19 +176,19 @@ u_db_get_credentials() {
       # in temporary virtual machines inaccessible to the outside world, but
       # it is obviously a security risk.
       reg_val=''
-      u_instance_registry_get "${db_id}.DB_PASSWORD"
+      u_instance_registry_get "${db_id}.DB_PASS"
 
       # Generate random local instance DB password and store it for subsequent
       # calls.
       if [[ -z "$reg_val" ]]; then
-        export DB_PASSWORD=`< /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo`
-        u_instance_registry_set "${db_id}.DB_PASSWORD" "$DB_PASSWORD"
+        export DB_PASS=`< /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo`
+        u_instance_registry_set "${db_id}.DB_PASS" "$DB_PASS"
       else
-        export DB_PASSWORD="$reg_val"
+        export DB_PASS="$reg_val"
       fi
 
-      export DB_ADMIN_USERNAME="${DB_ADMIN_USERNAME:=$DB_USERNAME}"
-      export DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:=$DB_PASSWORD}"
+      export DB_ADMIN_USER="${DB_ADMIN_USER:=$DB_USER}"
+      export DB_ADMIN_PASS="${DB_ADMIN_PASS:=$DB_PASS}"
     ;;
 
     # 'manual' mode requires terminal (prompts) on first call.
@@ -195,7 +196,7 @@ u_db_get_credentials() {
       local var
       local val
       local val_default
-      local vars_to_getset='DB_DRIVER DB_HOST DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_ADMIN_USERNAME DB_ADMIN_PASSWORD'
+      local vars_to_getset='DB_DRIVER DB_HOST DB_PORT DB_NAME DB_USER DB_PASS DB_ADMIN_USER DB_ADMIN_PASS'
 
       for var in $vars_to_getset; do
         val=''
@@ -222,7 +223,7 @@ u_db_get_credentials() {
             DB_NAME)
               val_default="$DB_ID"
               ;;
-            DB_USERNAME)
+            DB_USER)
               val_default="${DB_ID:0:16}"
               # Limit automatically generated user name to 16 or 32 characters,
               # depending on the driver used by current database ID. Prevents errors
@@ -233,14 +234,14 @@ u_db_get_credentials() {
                 mysql)    val_default="${val_default:0:16}" ;;
               esac
               ;;
-            DB_PASSWORD)
+            DB_PASS)
               val_default=`< /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo`
               ;;
-            DB_ADMIN_USERNAME)
-              val_default="$DB_USERNAME"
+            DB_ADMIN_USER)
+              val_default="$DB_USER"
               ;;
-            DB_ADMIN_PASSWORD)
-              val_default="$DB_PASSWORD"
+            DB_ADMIN_PASS)
+              val_default="$DB_PASS"
               ;;
             DB_TABLES_SKIP_DATA)
               val_default=""

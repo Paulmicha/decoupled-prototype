@@ -17,8 +17,8 @@
 $databases['default']['default'] = [
   'driver' => 'mysql',
   'database' => '{{ DB_NAME }}',
-  'username' => '{{ DB_USERNAME }}',
-  'password' => '{{ DB_PASSWORD }}',
+  'username' => '{{ DB_USER }}',
+  'password' => '{{ DB_PASS }}',
   'host' => '{{ DB_HOST }}',
   'prefix' => '',
 ];
