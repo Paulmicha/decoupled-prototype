@@ -11,4 +11,4 @@
 # @see cwt/bootstrap.sh
 #
 
-global DB_CHARSET "[default]=utf8 [help]='Some DB operations like import (a db dump) require that we specify the default DB charset, i.e. the --default_character_set argument of the postgres program.'"
+global SQL_CHARSET "[default]=utf8 [help]='Some DB operations like import (a db dump) require that we specify the default DB charset, i.e. the --default_character_set argument of the postgres program.'"

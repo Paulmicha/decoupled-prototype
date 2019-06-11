@@ -6,6 +6,19 @@
 # This file is dynamically included when the "hook" is triggered.
 # @see u_db_backup() in cwt/extensions/db/db.inc.sh
 #
+# The following variables are available here :
+#   - DB_ID - defaults to 'default'.
+#   - DB_DRIVER - defaults to 'mysql'.
+#   - DB_HOST - defaults to 'localhost'.
+#   - DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
+#   - DB_NAME - defaults to "$DB_ID".
+#   - DB_USERNAME - defaults to first 16 characters of DB_ID.
+#   - DB_PASSWORD - defaults to 14 random characters.
+#   - DB_ADMIN_USERNAME - defaults to DB_USERNAME.
+#   - DB_ADMIN_PASSWORD - defaults to DB_PASSWORD.
+#   - DB_TABLES_SKIP_DATA - defaults to an empty string.
+# @see u_db_get_credentials() in cwt/extensions/db/db.inc.sh
+#
 # @example
 #   make db-backup
 #   # Or :
@@ -22,19 +35,31 @@ if [[ -z "$db_dump_file" ]]; then
   exit 1
 fi
 
+# Support excluding data for specific tables.
+# See https://github.com/wodby/mariadb/blob/master/10/bin/backup
+skip_data=''
+if [[ -n "$DB_TABLES_SKIP_DATA" ]]; then
+  for table in $DB_TABLES_SKIP_DATA; do
+    # TODO [evol] Support wildcards - e.g. "cache*" to exclude all table names
+    # beginning with 'cache'.
+    skip_data+="--ignore-table=${DB_NAME}.${table} "
+  done
+fi
+
 u_fs_relative_path "$db_dump_file"
-echo "Creating MySQL dump '$relative_path' ..."
+echo "Creating $DB_ID DB $DB_DRIVER dump '$relative_path' ..."
 
-# Prevent MySQL ERROR 1470 (HY000) String is too long for user name - should
-# be no longer than 16 characters.
-# Warning : this creates naming collision risks (considered edge case).
-mysql_db_username="${DB_USERNAME:0:16}"
+# In order to support excluding data for specific tables, export the structure
+# alone first, then the data (optionally excluding said tables).
+# See https://github.com/wodby/mariadb/blob/master/10/bin/backup
 
+# 1. Structure.
 mysqldump \
-  --user="$mysql_db_username" \
+  --user="$DB_USERNAME" \
   --password="$DB_PASSWORD" \
   --host="$DB_HOST" \
   --port="$DB_PORT" \
+  --single-transaction --no-data --allow-keywords --skip-triggers \
   "$DB_NAME" > "$db_dump_file"
 
 if [[ $? -ne 0 ]]; then
@@ -45,4 +70,21 @@ if [[ $? -ne 0 ]]; then
   exit 2
 fi
 
-echo "Creating MySQL dump '$relative_path' : done."
+# 2. Data.
+mysqldump \
+  --user="$DB_USERNAME" \
+  --password="$DB_PASSWORD" \
+  --host="$DB_HOST" \
+  --port="$DB_PORT" \
+  --single-transaction --no-create-info "$skip_data" --allow-keywords \
+  "$DB_NAME" >> "$db_dump_file"
+
+if [[ $? -ne 0 ]]; then
+  echo >&2
+  echo "Error in $BASH_SOURCE line $LINENO: unable to backup DB '$DB_NAME' to dump file '$db_dump_file'." >&2
+  echo "-> Aborting (2)." >&2
+  echo >&2
+  exit 2
+fi
+
+echo "Creating $DB_ID DB $DB_DRIVER dump '$relative_path' : done."

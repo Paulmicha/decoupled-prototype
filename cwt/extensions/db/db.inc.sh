@@ -8,17 +8,7 @@
 #
 
 ##
-# Gets DB credentials (opt-out available when CWT_DB_MODE = 'none').
-#
-# @requires the following globals in calling scope :
-# - INSTANCE_DOMAIN
-# - CWT_DB_MODE
-# - CWT_DB_DUMPS_BASE_PATH
-#
-# @see cwt/extensions/db/global.vars.sh
-#
-# If CWT_DB_MODE is set to 'auto' or 'manual', the first call to this function
-# will generate *once* the following globals :
+# Gets and/or generates once DB credentials.
 #
 # @exports DB_ID - defaults to 'default'.
 # @exports DB_DRIVER - defaults to 'mysql'.
@@ -29,8 +19,18 @@
 # @exports DB_PASSWORD - defaults to 14 random characters.
 # @exports DB_ADMIN_USERNAME - defaults to DB_USERNAME.
 # @exports DB_ADMIN_PASSWORD - defaults to DB_PASSWORD.
+# @exports DB_TABLES_SKIP_DATA - defaults to an empty string.
 #
-# Subsequent calls to this function will read said values from registry.
+# @requires the following globals in calling scope :
+# - INSTANCE_DOMAIN
+# - CWT_DB_IDS
+# - CWT_DB_MODE
+# - CWT_DB_DUMPS_BASE_PATH
+# @see cwt/extensions/db/global.vars.sh
+#
+# If CWT_DB_MODE is set to 'auto' or 'manual', the first call to this function
+# will generate once the values for these globals.
+# Subsequent calls to this function will then read said values from registry.
 # @see cwt/instance/registry_set.sh
 # @see cwt/instance/registry_get.sh
 #
@@ -100,6 +100,7 @@ u_db_get_credentials() {
     # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
     # - $DB_ADMIN_USERNAME defaults to $DB_USERNAME
     # - $DB_ADMIN_PASSWORD defaults to $DB_PASSWORD
+    # - $DB_TABLES_SKIP_DATA defaults to an empty string
     none)
       if [[ -z "$DB_DRIVER" ]]; then
         export DB_DRIVER='mysql'
@@ -119,12 +120,15 @@ u_db_get_credentials() {
       if [[ -z "$DB_ADMIN_PASSWORD" ]]; then
         export DB_ADMIN_PASSWORD="$DB_PASSWORD"
       fi
+      if [[ -z "$DB_TABLES_SKIP_DATA" ]]; then
+        export DB_TABLES_SKIP_DATA=""
+      fi
       return
       ;;
 
     # The 'auto' mode means we only store the password, which gets generated
     # once on first call (and read otherwise).
-    # Other values will be assigned default values unless the following local
+    # Other values will be assigned default values unless the following global
     # env vars are already set in calling scope :
     # - $DB_DRIVER defaults to mysql
     # - $DB_NAME defaults to $DB_ID
@@ -133,6 +137,7 @@ u_db_get_credentials() {
     # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
     # - $DB_ADMIN_USERNAME defaults to $DB_USERNAME
     # - $DB_ADMIN_PASSWORD defaults to $DB_PASSWORD
+    # - $DB_TABLES_SKIP_DATA defaults to an empty string
     auto)
       if [[ -z "$DB_DRIVER" ]]; then
         export DB_DRIVER='mysql'
@@ -142,6 +147,14 @@ u_db_get_credentials() {
       fi
       if [[ -z "$DB_USERNAME" ]]; then
         export DB_USERNAME="$DB_ID"
+        # Limit automatically generated user name to 16 or 32 characters,
+        # depending on the driver used by current database ID. Prevents errors
+        # like "MySQL ERROR 1470 (HY000) String is too long for user name".
+        # Warning : this creates naming collision risks (considered edge case).
+        case "$DB_DRIVER" in
+          postgres) DB_USERNAME="${DB_USERNAME:0:32}" ;;
+          mysql)    DB_USERNAME="${DB_USERNAME:0:16}" ;;
+        esac
       fi
       if [[ -z "$DB_HOST" ]]; then
         export DB_HOST='localhost'
@@ -151,6 +164,9 @@ u_db_get_credentials() {
           postgres) export DB_PORT='5432' ;;
           *)        export DB_PORT='3306' ;;
         esac
+      fi
+      if [[ -z "$DB_TABLES_SKIP_DATA" ]]; then
+        export DB_TABLES_SKIP_DATA=""
       fi
 
       # Attempts to load password from registry (secrets store).
@@ -191,20 +207,8 @@ u_db_get_credentials() {
         # -> init & store.
         if [[ -z "$reg_val" ]]; then
           case "$var" in
-            DB_NAME)
-              val_default="$DB_ID"
-              ;;
-            DB_USERNAME)
-              val_default="${DB_ID:0:16}"
-              ;;
-            DB_PASSWORD)
-              val_default=`< /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo`
-              ;;
-            DB_ADMIN_USERNAME)
-              val_default="$DB_USERNAME"
-              ;;
-            DB_ADMIN_PASSWORD)
-              val_default="$DB_PASSWORD"
+            DB_DRIVER)
+              val_default='mysql'
               ;;
             DB_HOST)
               val_default='localhost'
@@ -215,8 +219,31 @@ u_db_get_credentials() {
                 val_default='5432'
               esac
               ;;
-            DB_DRIVER)
-              val_default='mysql'
+            DB_NAME)
+              val_default="$DB_ID"
+              ;;
+            DB_USERNAME)
+              val_default="${DB_ID:0:16}"
+              # Limit automatically generated user name to 16 or 32 characters,
+              # depending on the driver used by current database ID. Prevents errors
+              # like "MySQL ERROR 1470 (HY000) String is too long for user name".
+              # Warning : this creates naming collision risks (considered edge case).
+              case "$DB_DRIVER" in
+                postgres) val_default="${val_default:0:32}" ;;
+                mysql)    val_default="${val_default:0:16}" ;;
+              esac
+              ;;
+            DB_PASSWORD)
+              val_default=`< /dev/urandom tr -dc A-Za-z0-9 | head -c14; echo`
+              ;;
+            DB_ADMIN_USERNAME)
+              val_default="$DB_USERNAME"
+              ;;
+            DB_ADMIN_PASSWORD)
+              val_default="$DB_PASSWORD"
+              ;;
+            DB_TABLES_SKIP_DATA)
+              val_default=""
               ;;
           esac
 
@@ -394,6 +421,7 @@ u_db_import() {
 # "Abstract" means that this extension doesn't provide any actual implementation
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
+# @see cwt/extensions/postgres
 #
 # Important notes : implementations of the hook -s 'db' -a 'backup' MUST use the
 # following variable in calling scope as output path (resulting file) :
@@ -403,29 +431,21 @@ u_db_import() {
 # This function does not implement the creation of the "raw" DB dump file, but
 # it always compresses it immediately (appends ".tgz" to given file path).
 #
-# TODO [evol] make compression optional ?
-#
 # @param 1 String : the dump file path.
-# @param 2 [optional] String : $DB_NAME override.
 #
 # @example
 #   u_db_backup '/path/to/dump/file.sql'
-#   u_db_backup '/path/to/dump/file.sql' 'custom_db_name'
 #
 u_db_backup() {
   local p_dump_file_path="$1"
-  local p_db_name_override="$2"
+  local p_ignore_data_for="$2"
+
   local db_dump_dir
   local db_dump_file
   local db_dump_file_name
 
   u_db_get_credentials
 
-  if [[ -n "$p_db_name_override" ]]; then
-    DB_NAME="$p_db_name_override"
-  fi
-
-  # TODO [minor] sanitize $p_dump_file_path ?
   db_dump_file="$p_dump_file_path"
   db_dump_dir="${db_dump_file%/${db_dump_file##*/}}"
 
@@ -451,9 +471,6 @@ u_db_backup() {
       exit 1
     fi
   fi
-
-  # TODO should we trigger the hook that resets all filesystem ownership and
-  # permissions here ?
 
   # Implementations MUST use var $db_dump_file as output path (resulting file).
   u_hook_most_specific -s 'db' -a 'backup' -v 'PROVISION_USING'

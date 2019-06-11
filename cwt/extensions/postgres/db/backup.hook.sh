@@ -6,6 +6,19 @@
 # This file is dynamically included when the "hook" is triggered.
 # @see u_db_backup() in cwt/extensions/db/db.inc.sh
 #
+# The following variables are available here :
+#   - DB_ID - defaults to 'default'.
+#   - DB_DRIVER - defaults to 'mysql'.
+#   - DB_HOST - defaults to 'localhost'.
+#   - DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
+#   - DB_NAME - defaults to "$DB_ID".
+#   - DB_USERNAME - defaults to first 16 characters of DB_ID.
+#   - DB_PASSWORD - defaults to 14 random characters.
+#   - DB_ADMIN_USERNAME - defaults to DB_USERNAME.
+#   - DB_ADMIN_PASSWORD - defaults to DB_PASSWORD.
+#   - DB_TABLES_SKIP_DATA - defaults to an empty string.
+# @see u_db_get_credentials() in cwt/extensions/db/db.inc.sh
+#
 # @example
 #   make db-backup
 #   # Or :
@@ -22,20 +35,33 @@ if [[ -z "$db_dump_file" ]]; then
   exit 1
 fi
 
+# Support excluding data for specific tables.
+# See https://github.com/wodby/postgres/blob/master/bin/backup
+skip_data=''
+if [[ -n "$DB_TABLES_SKIP_DATA" ]]; then
+  for table in $DB_TABLES_SKIP_DATA; do
+    # TODO [evol] Support wildcards - e.g. "cache*" to exclude all table names
+    # beginning with 'cache'.
+    skip_data+="--exclude-table-data=$table "
+  done
+fi
+
 u_fs_relative_path "$db_dump_file"
-echo "Creating postgres dump '$relative_path' ..."
+echo "Creating $DB_ID DB $DB_DRIVER dump '$relative_path' ..."
 
-# Prevent postgres ERROR 1470 (HY000) String is too long for user name - should
-# be no longer than 16 characters.
-# Warning : this creates naming collision risks (considered edge case).
-postgres_db_username="${DB_USERNAME:0:16}"
+# PostgreSQL utilities use the environment variables supported by libpq.
+# See https://www.postgresql.org/docs/current/libpq-envars.html
+PGPASSWORD="$DB_PASSWORD"
 
-postgresdump \
-  --user="$postgres_db_username" \
-  --password="$DB_PASSWORD" \
-  --host="$DB_HOST" \
-  --port="$DB_PORT" \
-  "$DB_NAME" > "$db_dump_file"
+# Use nice + ionice to tune down server ressources used for backup.
+# See https://github.com/wodby/postgres/blob/master/bin/backup
+# + https://github.com/wodby/postgres/blob/master/bin/actions.mk
+nice -n 10 ionice -c2 -n 7 \
+  pg_dump "$skip_data" \
+    -U"$DB_USERNAME" \
+    -h"$DB_HOST" \
+    -p"$DB_PORT" \
+    "$DB_NAME" > "$db_dump_file"
 
 if [[ $? -ne 0 ]]; then
   echo >&2
@@ -45,4 +71,4 @@ if [[ $? -ne 0 ]]; then
   exit 2
 fi
 
-echo "Creating postgres dump '$relative_path' : done."
+echo "Creating $DB_ID DB $DB_DRIVER dump '$relative_path' : done."

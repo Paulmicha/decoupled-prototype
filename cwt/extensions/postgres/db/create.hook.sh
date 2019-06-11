@@ -16,6 +16,8 @@
 #   - DB_PASSWORD - defaults to 14 random characters.
 #   - DB_ADMIN_USERNAME - defaults to DB_USERNAME.
 #   - DB_ADMIN_PASSWORD - defaults to DB_PASSWORD.
+#   - DB_TABLES_SKIP_DATA - defaults to an empty string.
+# @see u_db_get_credentials() in cwt/extensions/db/db.inc.sh
 #
 # @example
 #   make db-create
@@ -23,17 +25,16 @@
 #   cwt/extensions/db/db/create.sh
 #
 
-# Limit user name to 32 characters.
-# Warning : this creates naming collision risks (considered edge case).
-postgres_db_username="${DB_USERNAME:0:32}"
+echo "Creating $DB_ID $DB_DRIVER database '$DB_NAME' ..."
 
-echo "Creating database '$DB_NAME' ..."
+# PostgreSQL utilities use the environment variables supported by libpq.
+# See https://www.postgresql.org/docs/current/libpq-envars.html
+PGPASSWORD="$DB_PASSWORD"
 
-PGPASSWORD="${DB_PASSWORD}" \
-  createdb \
-    -U"${DB_USERNAME}" \
-    -h"${DB_HOST}" \
-    -p"${DB_PORT}" \
-    "${DB_NAME}"
+createdb \
+  -U"$DB_USERNAME" \
+  -h"$DB_HOST" \
+  -p"$DB_PORT" \
+  "$DB_NAME"
 
-echo "Creating database '$DB_NAME' : done."
+echo "Creating $DB_ID $DB_DRIVER database '$DB_NAME' : done."
