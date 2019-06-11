@@ -20,8 +20,5 @@ alias composersu="docker-compose exec $DC_TTY --user root ${DWT_PHP_SNAME:=php} 
 alias drush="docker-compose exec $DC_TTY ${DWT_PHP_SNAME:=php} drush --root=${APP_DOCROOT_C:=/var/www/html}"
 alias drupal="docker-compose exec $DC_TTY ${DWT_PHP_SNAME:=php} ./vendor/drupal/console/bin/drupal --root=${APP_DOCROOT_C:=/var/www/html}"
 
-alias mysql="docker-compose exec $DC_TTY ${DWT_DB_SNAME:=mariadb} mysql"
-alias mysqldump="docker-compose exec $DC_TTY ${DWT_DB_SNAME:=mariadb} mysqldump"
-
 # [debug] log current instance domain (check remote calls).
 # echo "Bash aliases loaded ($INSTANCE_DOMAIN)."

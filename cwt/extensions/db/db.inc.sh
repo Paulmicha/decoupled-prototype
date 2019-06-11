@@ -20,14 +20,15 @@
 # If CWT_DB_MODE is set to 'auto' or 'manual', the first call to this function
 # will generate *once* the following globals :
 #
-# @exports DB_ID - defaults to sanitized "$INSTANCE_DOMAIN".
+# @exports DB_ID - defaults to 'default'.
+# @exports DB_DRIVER - defaults to 'mysql'.
+# @exports DB_HOST - defaults to 'localhost'.
+# @exports DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
 # @exports DB_NAME - defaults to "$DB_ID".
 # @exports DB_USERNAME - defaults to first 16 characters of DB_ID.
 # @exports DB_PASSWORD - defaults to 14 random characters.
 # @exports DB_ADMIN_USERNAME - defaults to DB_USERNAME.
 # @exports DB_ADMIN_PASSWORD - defaults to DB_PASSWORD.
-# @exports DB_HOST - defaults to 'localhost'.
-# @exports DB_PORT - defaults to '3306'.
 #
 # Subsequent calls to this function will read said values from registry.
 # @see cwt/instance/registry_set.sh
@@ -94,16 +95,23 @@ u_db_get_credentials() {
     # - $DB_USERNAME
     # - $DB_PASSWORD
     # These fallback values are provided if not set :
+    # - $DB_DRIVER defaults to mysql
     # - $DB_HOST defaults to localhost
-    # - $DB_PORT defaults to 3306
+    # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
     # - $DB_ADMIN_USERNAME defaults to $DB_USERNAME
     # - $DB_ADMIN_PASSWORD defaults to $DB_PASSWORD
     none)
+      if [[ -z "$DB_DRIVER" ]]; then
+        export DB_DRIVER='mysql'
+      fi
       if [[ -z "$DB_HOST" ]]; then
         export DB_HOST='localhost'
       fi
       if [[ -z "$DB_PORT" ]]; then
-        export DB_PORT=3306
+        case "$DB_DRIVER" in
+          postgres) export DB_PORT='5432' ;;
+          *)        export DB_PORT='3306' ;;
+        esac
       fi
       if [[ -z "$DB_ADMIN_USERNAME" ]]; then
         export DB_ADMIN_USERNAME="$DB_USERNAME"
@@ -118,13 +126,17 @@ u_db_get_credentials() {
     # once on first call (and read otherwise).
     # Other values will be assigned default values unless the following local
     # env vars are already set in calling scope :
+    # - $DB_DRIVER defaults to mysql
     # - $DB_NAME defaults to $DB_ID
     # - $DB_USERNAME defaults to $DB_ID
     # - $DB_HOST defaults to localhost
-    # - $DB_PORT defaults to 3306
+    # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
     # - $DB_ADMIN_USERNAME defaults to $DB_USERNAME
     # - $DB_ADMIN_PASSWORD defaults to $DB_PASSWORD
     auto)
+      if [[ -z "$DB_DRIVER" ]]; then
+        export DB_DRIVER='mysql'
+      fi
       if [[ -z "$DB_NAME" ]]; then
         export DB_NAME="$DB_ID"
       fi
@@ -135,7 +147,10 @@ u_db_get_credentials() {
         export DB_HOST='localhost'
       fi
       if [[ -z "$DB_PORT" ]]; then
-        export DB_PORT=3306
+        case "$DB_DRIVER" in
+          postgres) export DB_PORT='5432' ;;
+          *)        export DB_PORT='3306' ;;
+        esac
       fi
 
       # Attempts to load password from registry (secrets store).
@@ -164,7 +179,7 @@ u_db_get_credentials() {
       local var
       local val
       local val_default
-      local vars_to_getset='DB_NAME DB_USERNAME DB_PASSWORD DB_ADMIN_USERNAME DB_ADMIN_PASSWORD DB_HOST DB_PORT'
+      local vars_to_getset='DB_DRIVER DB_HOST DB_PORT DB_NAME DB_USERNAME DB_PASSWORD DB_ADMIN_USERNAME DB_ADMIN_PASSWORD'
 
       for var in $vars_to_getset; do
         val=''
@@ -196,6 +211,12 @@ u_db_get_credentials() {
               ;;
             DB_PORT)
               val_default='3306'
+              case "$DB_DRIVER" in pgsql|postgres)
+                val_default='5432'
+              esac
+              ;;
+            DB_DRIVER)
+              val_default='mysql'
               ;;
           esac
 

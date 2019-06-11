@@ -10,9 +10,9 @@
 # @see cwt/extensions/docker-compose/cwt/pre_bootstrap.docker-compose.hook.sh
 #
 
-alias node="docker-compose exec $DC_TTY nodejs node"
-alias npm="docker-compose exec $DC_TTY nodejs npm"
-alias npx="docker-compose exec $DC_TTY nodejs npx"
+alias node="docker-compose exec $DC_TTY node node"
+alias npm="docker-compose exec $DC_TTY node npm"
+alias npx="docker-compose exec $DC_TTY node npx"
 alias php="docker-compose exec $DC_TTY php php"
 alias composer="docker-compose exec $DC_TTY php composer"
-alias drush="docker-compose exec $DC_TTY php drush"
+alias drush="docker-compose exec $DC_TTY php drush --root=/var/www/html/web"
