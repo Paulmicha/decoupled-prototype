@@ -10,20 +10,18 @@
  * -> Do not edit directly (will be overwritten).
  *
  * Details in dev stack :
- * @see cwt/extensions/drupalwt/app/drupal_settings.8.tpl.php
- * @see cwt/extensions/drupalwt/drupalwt.inc.sh
+ * @see scripts/cwt/extend/app/drupal_settings.8.tpl.php
  */
 
-// TODO [wip] Postgres entiries differs - make another defautl variant.
 $databases['default']['default'] = [
-  'driver' => 'mysql',
+  'driver' => 'pgsql',
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\pgsql',
   'database' => '{{ DB_NAME }}',
   'username' => '{{ DB_USER }}',
   'password' => '{{ DB_PASS }}',
   'host' => '{{ DB_HOST }}',
   'port' => '{{ DB_PORT }}',
   'prefix' => '',
-  'collation' => 'utf8mb4_general_ci',
 ];
 
 $config_directories[CONFIG_SYNC_DIRECTORY] = '{{ DRUPAL_CONFIG_SYNC_DIR }}';

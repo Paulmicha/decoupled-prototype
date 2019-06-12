@@ -28,10 +28,10 @@ services:
       NGINX_ERROR_LOG_LEVEL: debug
       NGINX_BACKEND_HOST: php
       NGINX_VHOST_PRESET: php
-      NGINX_SERVER_ROOT: /var/www/web
+      NGINX_SERVER_ROOT: /var/www/html/web
     restart: on-failure:5
     volumes:
-      - ./app/backend:/var/www
+      - ./app/backend:/var/www/html
     labels:
       - 'traefik.backend=${DC_NS}_nginx'
       - 'traefik.port=80'
@@ -49,7 +49,7 @@ services:
       DB_DRIVER: $DB_DRIVER
       DB_NAME: $DB_NAME
       DB_USER: $DB_USER
-      DB_PASSWORD: $DB_PASSWORD
+      DB_PASSWORD: $DB_PASS
       COLUMNS: 80
       # Custom CWT instance variants.
       # Usage example in Php :
@@ -59,7 +59,7 @@ services:
       INSTANCE_DOMAIN: $INSTANCE_DOMAIN
     restart: on-failure:5
     volumes:
-      - ./app/backend:/var/www
+      - ./app/backend:/var/www/html
       - ./data/files:/mnt/files/public
       - ./data/tmp:/mnt/files/tmp
       - ./data/private:/mnt/files/public
@@ -88,7 +88,7 @@ services:
     environment:
       POSTGRES_DB: $DB_NAME
       POSTGRES_USER: $DB_USER
-      POSTGRES_PASSWORD: $DB_PASSWORD
+      POSTGRES_PASSWORD: $DB_PASS
     restart: on-failure:5
     # TODO [prod-check] only use bind mounts for local dev.
     volumes:

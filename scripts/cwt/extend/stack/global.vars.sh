@@ -22,8 +22,8 @@ global DB_USER 'app'
 # commands in order to avoid having them written unencrypted in local files,
 # such as '.env'.
 case "${HOST_TYPE}" in 'local')
-  global DB_PASSWORD 'app'
-  global DB_ROOT_PASSWORD 'app'
+  global DB_PASS 'app'
+  global DB_ADMIN_PASS 'app'
   global HASURA_GRAPHQL_ADMIN_SECRET 'secret'
 esac
 

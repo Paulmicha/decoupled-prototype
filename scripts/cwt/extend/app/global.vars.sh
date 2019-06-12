@@ -14,4 +14,5 @@
 # TODO [wip] narrow down this workaround for permission issues in node app.
 global EXECUTABLE_DIRS "[append]=app/frontend"
 
-global DRUPAL_CONFIG_SYNC_DIR "app/backend/config/sync"
+# global DRUPAL_CONFIG_SYNC_DIR "app/backend/config/sync"
+global DRUPAL_CONFIG_SYNC_DIR "profiles/contrib/contenta_jsonapi/config/sync"
