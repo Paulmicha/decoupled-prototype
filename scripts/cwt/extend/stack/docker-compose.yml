@@ -27,7 +27,7 @@ services:
       NGINX_STATIC_OPEN_FILE_CACHE: "off"
       NGINX_ERROR_LOG_LEVEL: debug
       NGINX_BACKEND_HOST: php
-      NGINX_VHOST_PRESET: php
+      NGINX_VHOST_PRESET: drupal-8
       NGINX_SERVER_ROOT: /var/www/html/web
     restart: on-failure:5
     volumes:
