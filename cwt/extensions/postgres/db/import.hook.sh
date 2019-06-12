@@ -39,12 +39,17 @@ fi
 # See https://www.postgresql.org/docs/current/libpq-envars.html
 PGPASSWORD="$DB_PASS"
 
-# TODO [wip]
+psql \
+  -U "$DB_USER" \
+  -h "$DB_HOST" \
+  -p "$DB_PORT" \
+  -d "$DB_NAME" \
+  -f "$db_dump_file"
 
 if [[ $? -ne 0 ]]; then
   echo >&2
-  echo "Error in $BASH_SOURCE line $LINENO: unable to import dump file '$db_dump_file' into DB '$DB_NAME'." >&2
-  echo "-> Aborting (3)." >&2
+  echo "Error in $BASH_SOURCE line $LINENO: unable to import dump file '$db_dump_file' into $DB_DRIVER DB '$DB_NAME'." >&2
+  echo "-> Aborting (2)." >&2
   echo >&2
-  exit 3
+  exit 2
 fi

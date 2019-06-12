@@ -45,8 +45,8 @@ mysql --default_character_set="$SQL_CHARSET" \
 
 if [[ $? -ne 0 ]]; then
   echo >&2
-  echo "Error in $BASH_SOURCE line $LINENO: unable to import dump file '$db_dump_file' into DB '$DB_NAME'." >&2
-  echo "-> Aborting (3)." >&2
+  echo "Error in $BASH_SOURCE line $LINENO: unable to import dump file '$db_dump_file' into $DB_DRIVER DB '$DB_NAME'." >&2
+  echo "-> Aborting (2)." >&2
   echo >&2
-  exit 3
+  exit 2
 fi

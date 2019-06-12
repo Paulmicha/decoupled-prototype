@@ -25,4 +25,60 @@
 #   cwt/extensions/db/db/clear.sh
 #
 
-# TODO [wip]
+# PostgreSQL utilities use the environment variables supported by libpq.
+# See https://www.postgresql.org/docs/current/libpq-envars.html
+PGPASSWORD="$DB_PASS"
+
+# 1. Clears views (if any).
+views_list=$(psql \
+  -U "$DB_USER" \
+  -h "$DB_HOST" \
+  -p "$DB_PORT" \
+  -d "$DB_NAME" \
+  -t \
+  --command "SELECT string_agg(table_name, ',') FROM information_schema.tables WHERE table_schema='public' AND table_type='VIEW'")
+
+if [[ -n "$views_list" ]]; then
+  psql \
+    -U "$DB_USER" \
+    -h "$DB_HOST" \
+    -p "$DB_PORT" \
+    -d "$DB_NAME" \
+    -t \
+    --command "DROP VIEW IF EXISTS $views_list CASCADE"
+
+  if [[ $? -ne 0 ]]; then
+    echo >&2
+    echo "Error in $BASH_SOURCE line $LINENO: unable to clear views in $DB_DRIVER DB '$DB_NAME'." >&2
+    echo "-> Aborting (1)." >&2
+    echo >&2
+    exit 1
+  fi
+fi
+
+# 2. Clears tables.
+tables_list=$(psql \
+  -U "$DB_USER" \
+  -h "$DB_HOST" \
+  -p "$DB_PORT" \
+  -d "$DB_NAME" \
+  -t \
+  --command "SELECT string_agg(table_name, ',') FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'")
+
+if [[ -n "$views_list" ]]; then
+  psql \
+    -U "$DB_USER" \
+    -h "$DB_HOST" \
+    -p "$DB_PORT" \
+    -d "$DB_NAME" \
+    -t \
+    --command "DROP TABLE IF EXISTS $tables_list CASCADE"
+
+  if [[ $? -ne 0 ]]; then
+    echo >&2
+    echo "Error in $BASH_SOURCE line $LINENO: unable to clear tables in $DB_DRIVER DB '$DB_NAME'." >&2
+    echo "-> Aborting (2)." >&2
+    echo >&2
+    exit 2
+  fi
+fi

@@ -34,7 +34,7 @@ mysqldump --no-data --add-drop-table \
   "$DB_NAME" \
   | grep ^DROP \
   | mysql \
-    --user="$mysql_db_username" \
+    --user="$DB_USER" \
     --password="$DB_PASS" \
     --host="$DB_HOST" \
     --port="$DB_PORT" \
@@ -42,7 +42,7 @@ mysqldump --no-data --add-drop-table \
 
 if [[ $? -ne 0 ]]; then
   echo >&2
-  echo "Error in $BASH_SOURCE line $LINENO: unable to clear existing data in DB '$DB_NAME'." >&2
+  echo "Error in $BASH_SOURCE line $LINENO: unable to clear existing data in $DB_DRIVER DB '$DB_NAME'." >&2
   echo "-> Aborting (1)." >&2
   echo >&2
   exit 1

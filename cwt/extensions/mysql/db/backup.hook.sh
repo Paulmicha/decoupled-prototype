@@ -64,7 +64,7 @@ mysqldump \
 
 if [[ $? -ne 0 ]]; then
   echo >&2
-  echo "Error in $BASH_SOURCE line $LINENO: unable to backup DB '$DB_NAME' to dump file '$db_dump_file'." >&2
+  echo "Error in $BASH_SOURCE line $LINENO: unable to backup $DB_DRIVER DB '$DB_NAME' to dump file '$db_dump_file'." >&2
   echo "-> Aborting (2)." >&2
   echo >&2
   exit 2
@@ -81,10 +81,10 @@ mysqldump \
 
 if [[ $? -ne 0 ]]; then
   echo >&2
-  echo "Error in $BASH_SOURCE line $LINENO: unable to backup DB '$DB_NAME' to dump file '$db_dump_file'." >&2
-  echo "-> Aborting (2)." >&2
+  echo "Error in $BASH_SOURCE line $LINENO: unable to backup $DB_DRIVER DB '$DB_NAME' to dump file '$db_dump_file'." >&2
+  echo "-> Aborting (3)." >&2
   echo >&2
-  exit 2
+  exit 3
 fi
 
 echo "Creating $DB_ID DB $DB_DRIVER dump '$relative_path' : done."
