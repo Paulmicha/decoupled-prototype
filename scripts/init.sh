@@ -46,7 +46,7 @@ echo
 echo "(Re)initializing $host_type instance (type : $instance_type) using $provision_using ..."
 
 cwt/instance/init.sh \
-  -a "$PWD/app" \
+  -a "$PWD/app/backend/web" \
   -t "$instance_type" \
   -h "$host_type" \
   -p "$provision_using" \

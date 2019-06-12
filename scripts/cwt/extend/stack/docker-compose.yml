@@ -9,6 +9,7 @@ services:
       - "php"
     working_dir: /app/frontend
     command: sh -c 'npm install && npm run ${NODE_RUN_ON_START}'
+    restart: on-failure: 5
     volumes:
       - ./app/frontend:/app
     labels:
@@ -28,6 +29,7 @@ services:
       NGINX_BACKEND_HOST: php
       NGINX_VHOST_PRESET: php
       NGINX_SERVER_ROOT: /var/www/web
+    restart: on-failure: 5
     volumes:
       - ./app/backend:/var/www
     labels:
@@ -55,6 +57,7 @@ services:
       HOST_TYPE: $HOST_TYPE
       INSTANCE_TYPE: $INSTANCE_TYPE
       INSTANCE_DOMAIN: $INSTANCE_DOMAIN
+    restart: on-failure: 5
     volumes:
       - ./app/backend:/var/www
       - ./data/files:/mnt/files/public
@@ -71,6 +74,7 @@ services:
       HASURA_GRAPHQL_DATABASE_URL: postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: $HASURA_GRAPHQL_ADMIN_SECRET
+    restart: on-failure: 5
     labels:
       - 'traefik.backend=${DC_NS}_hasura'
       - 'traefik.port=8080'
@@ -85,6 +89,7 @@ services:
       POSTGRES_DB: $DB_NAME
       POSTGRES_USER: $DB_USER
       POSTGRES_PASSWORD: $DB_PASSWORD
+    restart: on-failure: 5
     # TODO [prod-check] only use bind mounts for local dev.
     volumes:
       - ./data/db/default:/var/lib/postgresql/data
@@ -92,3 +97,4 @@ services:
   # See https://github.com/wodby/redis
   redis:
     image: wodby/redis:$REDIS_TAG
+    restart: on-failure: 5

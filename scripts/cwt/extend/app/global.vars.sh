@@ -11,8 +11,7 @@
 # @see cwt/bootstrap.sh
 #
 
-# TODO [hack] narrow down.
+# TODO [wip] narrow down this workaround for permission issues in node app.
 global EXECUTABLE_DIRS "[append]=app/frontend"
 
-# TODO [wip] use drupalwt CWT extension.
-# @see cwt/extensions/drupalwt
+global DRUPAL_CONFIG_SYNC_DIR "app/backend/config/sync"
