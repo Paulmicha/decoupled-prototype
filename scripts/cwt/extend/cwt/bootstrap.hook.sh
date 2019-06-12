@@ -13,6 +13,3 @@
 alias node="docker-compose exec $DC_TTY node node"
 alias npm="docker-compose exec $DC_TTY node npm"
 alias npx="docker-compose exec $DC_TTY node npx"
-alias php="docker-compose exec $DC_TTY php php"
-alias composer="docker-compose exec $DC_TTY php composer"
-alias drush="docker-compose exec $DC_TTY php drush --root=/var/www/html/web"
