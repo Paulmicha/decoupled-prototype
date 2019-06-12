@@ -12,7 +12,7 @@
 #
 
 # Contenta CMS uses keys which need special permission.
-chmod 660 app/backend/keys -R
+chmod 660 'app/backend/keys' -R
 
 # Make the DB files world readable.
 # TODO [wip] sudoers config.

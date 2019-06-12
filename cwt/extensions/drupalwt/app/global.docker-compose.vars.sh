@@ -15,7 +15,7 @@
 
 # Path to public web directory (where index.php resides) inside web server + php
 # containers. Used in docker-compose.yml file.
-global APP_DOCROOT_C "[default]=/var/www/web"
+global APP_DOCROOT_C "[default]=/var/www/html/web"
 
 global DRUPAL_FILES_DIR_C "[default]=sites/default/files"
 

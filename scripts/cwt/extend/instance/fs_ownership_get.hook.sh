@@ -4,6 +4,10 @@
 # Implements hook -s 'app instance' -a 'fs_ownership_get' -v 'PROVISION_USING HOST_TYPE INSTANCE_TYPE'
 #
 # Provide the user who must be set as owner of dirs and files writeable by php.
+# To apply, run :
+#   sudo cwt/instance/fix_ownership.sh
+#   # Or :
+#   sudo make fix-ownership
 #
 # Here are the variable names that can be set here and their default value :
 # FS_OWNER : [optional] owner of all files and dirs.
@@ -27,4 +31,5 @@
 # PHP-FPM runs from www-data:www-data user (UID/GID 82) by default.
 # User wodby is a part of www-data group.
 # See https://github.com/wodby/php#users-and-permissions
+# TODO [fail] workaround : make all writeable dirs world writeable.
 FS_W_OWNER='82'
