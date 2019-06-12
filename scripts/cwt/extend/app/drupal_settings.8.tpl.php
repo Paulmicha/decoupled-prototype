@@ -34,10 +34,11 @@ $config['system.file']['path']['temporary'] = '{{ DRUPAL_TMP_DIR }}';
 
 // Redis cache backend (contrib) is included by default. Requires the PhpRedis
 // extension.
-$settings['redis.connection']['interface'] = 'PhpRedis';
-$settings['redis.connection']['host'] = 'redis';
-$settings['cache']['default'] = 'cache.backend.redis';
-$settings['redis.connection']['base'] = 1;
+// TODO [wip] install & enable in contenta upon install.
+// $settings['redis.connection']['interface'] = 'PhpRedis';
+// $settings['redis.connection']['host'] = 'redis';
+// $settings['cache']['default'] = 'cache.backend.redis';
+// $settings['redis.connection']['base'] = 1;
 
 // Conditionnally apply local development services and settings.
 // @see web/sites/example.settings.local.php

@@ -92,9 +92,9 @@ if [[ -n "$EXECUTABLE_DIRS" ]]; then
     if [[ ! -d "$executable_dir" ]]; then
       continue
     fi
-    echo "Setting executable file permissions $FS_W_FILES to files inside '$executable_dir'"
-    find "$executable_dir" -type f -exec chmod "$FS_W_FILES" {} +
-    echo "Setting executable dir permissions $FS_W_DIRS to '$executable_dir'"
-    find "$executable_dir" -type d -exec chmod "$FS_W_DIRS" {} +
+    echo "Setting executable file permissions $FS_E_FILES to files inside '$executable_dir'"
+    find "$executable_dir" -type f -exec chmod "$FS_E_FILES" {} +
+    echo "Setting executable dir permissions $FS_NW_DIRS to '$executable_dir'"
+    find "$executable_dir" -type d -exec chmod "$FS_NW_DIRS" {} +
   done
 fi

@@ -11,6 +11,13 @@
 # @see u_instance_set_permissions() in cwt/instance/instance.inc.sh
 #
 
+# Contenta CMS uses keys which need special permission.
+chmod 660 app/backend/keys -R
+
 # Make the DB files world readable.
 # TODO [wip] sudoers config.
 # sudo chmod -R o+rx data/db
+
+# Adds read access to data dir for current user for local dev instances.
+# TODO [fail] requires sudoing too.
+# setfacl -R -m u:"$USER":r data
