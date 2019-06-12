@@ -60,9 +60,8 @@ services:
     restart: on-failure:5
     volumes:
       - ./app/backend:/var/www/html
-      - ./data/files:/mnt/files/public
       - ./data/tmp:/mnt/files/tmp
-      - ./data/private:/mnt/files/public
+      - ./data/private:/mnt/files/private
 
   # See https://github.com/hasura/graphql-engine/tree/master/install-manifests/docker-compose
   hasura:

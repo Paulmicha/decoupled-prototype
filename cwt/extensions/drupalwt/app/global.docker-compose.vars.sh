@@ -17,7 +17,7 @@
 # containers. Used in docker-compose.yml file.
 global APP_DOCROOT_C "[default]=/var/www/web"
 
-global DRUPAL_FILES_DIR_C "[default]=/mnt/files/public"
+global DRUPAL_FILES_DIR_C "[default]=sites/default/files"
 
 # These require matching volumes in docker-compose.yml for the 'php' container.
 global DRUPAL_TMP_DIR_C "[default]='/mnt/files/tmp'"
