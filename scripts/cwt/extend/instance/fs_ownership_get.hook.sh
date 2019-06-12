@@ -32,4 +32,4 @@
 # User wodby is a part of www-data group.
 # See https://github.com/wodby/php#users-and-permissions
 # TODO [fail] workaround : make all writeable dirs world writeable.
-FS_W_OWNER='82'
+# FS_W_OWNER='82'

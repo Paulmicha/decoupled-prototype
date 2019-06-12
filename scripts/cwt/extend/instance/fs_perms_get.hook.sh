@@ -34,5 +34,5 @@
 # TODO [hack] Fix ownership issue (try ACL ?)
 # @see scripts/cwt/extend/app/fs_ownership_get.hook.sh
 # -> Workaround : make writeable dirs & files world-writeable.
-FS_W_FILES='0776'
-FS_W_DIRS='1776'
+FS_W_FILES='0777'
+FS_W_DIRS='1777'
