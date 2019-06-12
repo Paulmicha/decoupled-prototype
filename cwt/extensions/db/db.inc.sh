@@ -34,8 +34,7 @@
 # @see cwt/instance/registry_set.sh
 # @see cwt/instance/registry_get.sh
 #
-# @param 1 [optional] String : unique identifier for requested DB (defaults to
-#   sanitized INSTANCE_DOMAIN global).
+# @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
 # @param 2 [optional] String : force reload flag (bypasses optimization) if the
 #   DB credentials vars are already exported in current shell scope.
 #
@@ -279,22 +278,16 @@ u_db_get_credentials() {
 # will be sourced when the hook is triggered, use :
 # $ make hook-debug ms s:db a:create v:PROVISION_USING
 #
-# @param 1 [optional] String : $DB_NAME override.
+# @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 2 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_create
-#   u_db_create 'custom_db_name'
 #
 u_db_create() {
-  local p_db_name_override="$1"
-
-  u_db_get_credentials
-
-  if [[ -n "$p_db_name_override" ]]; then
-    DB_NAME="$p_db_name_override"
-  fi
-
-  u_hook_most_specific -s 'db' -a 'create' -v 'PROVISION_USING'
+  u_db_get_credentials $@
+  u_hook_most_specific -s 'db' -a 'create' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
 }
 
 ##
@@ -304,22 +297,16 @@ u_db_create() {
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
 #
-# @param 1 [optional] String : $DB_NAME override.
+# @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 2 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_destroy
-#   u_db_destroy 'custom_db_name'
 #
 u_db_destroy() {
-  local p_db_name_override="$1"
-
-  u_db_get_credentials
-
-  if [[ -n "$p_db_name_override" ]]; then
-    DB_NAME="$p_db_name_override"
-  fi
-
-  u_hook_most_specific -s 'db' -a 'destroy' -v 'PROVISION_USING'
+  u_db_get_credentials $@
+  u_hook_most_specific -s 'db' -a 'destroy' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
 }
 
 ##
@@ -339,15 +326,15 @@ u_db_destroy() {
 # extension).
 #
 # @param 1 String : the dump file path.
-# @param 2 [optional] String : $DB_NAME override.
+# @param 2 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 3 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_import '/path/to/dump/file.sql.tgz'
-#   u_db_import '/path/to/dump/file.sql' 'custom_db_name'
 #
 u_db_import() {
   local p_dump_file_path="$1"
-  local p_db_name_override="$2"
   local db_dump_dir
   local db_dump_file
   local leaf
@@ -360,11 +347,7 @@ u_db_import() {
     exit 1
   fi
 
-  u_db_get_credentials
-
-  if [[ -n "$p_db_name_override" ]]; then
-    DB_NAME="$p_db_name_override"
-  fi
+  u_db_get_credentials $2 $3
 
   db_dump_file="$p_dump_file_path"
 
@@ -401,7 +384,7 @@ u_db_import() {
   fi
 
   # Implementations MUST use var $db_dump_file as input path (source file).
-  u_hook_most_specific -s 'db' -a 'import' -v 'PROVISION_USING'
+  u_hook_most_specific -s 'db' -a 'import' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
 
   # Remove uncompressed version of the dump when we're done.
   if [[ $file_was_uncompressed -eq 0 ]]; then
@@ -433,19 +416,21 @@ u_db_import() {
 # it always compresses it immediately (appends ".tgz" to given file path).
 #
 # @param 1 String : the dump file path.
+# @param 2 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 3 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_backup '/path/to/dump/file.sql'
 #
 u_db_backup() {
   local p_dump_file_path="$1"
-  local p_ignore_data_for="$2"
 
   local db_dump_dir
   local db_dump_file
   local db_dump_file_name
 
-  u_db_get_credentials
+  u_db_get_credentials $2 $3
 
   db_dump_file="$p_dump_file_path"
   db_dump_dir="${db_dump_file%/${db_dump_file##*/}}"
@@ -474,7 +459,7 @@ u_db_backup() {
   fi
 
   # Implementations MUST use var $db_dump_file as output path (resulting file).
-  u_hook_most_specific -s 'db' -a 'backup' -v 'PROVISION_USING'
+  u_hook_most_specific -s 'db' -a 'backup' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
 
   if [ ! -f "$db_dump_file" ]; then
     echo >&2
@@ -512,37 +497,31 @@ u_db_backup() {
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
 #
-# @param 1 [optional] String : $DB_NAME override.
+# @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 2 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_clear
-#   u_db_clear 'custom_db_name'
 #
 u_db_clear() {
-  local p_db_name_override="$1"
-
-  u_db_get_credentials
-
-  if [[ -n "$p_db_name_override" ]]; then
-    DB_NAME="$p_db_name_override"
-  fi
-
-  u_hook_most_specific -s 'db' -a 'clear' -v 'PROVISION_USING'
+  u_db_get_credentials $@
+  u_hook_most_specific -s 'db' -a 'clear' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
 }
 
 ##
 # Empties database + imports given dump file.
 #
 # @param 1 String : the dump file path.
-# @param 2 [optional] String : $DB_NAME override.
+# @param 2 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 3 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_restore '/path/to/dump/file.sql'
-#   u_db_restore '/path/to/dump/file.sql' 'custom_db_name'
 #
 u_db_restore() {
   local p_dump_file_path="$1"
-  local p_db_name_override="$2"
 
   if [[ ! -f "$p_dump_file_path" ]]; then
     echo >&2
@@ -552,13 +531,7 @@ u_db_restore() {
     exit 1
   fi
 
-  u_db_get_credentials
-
-  if [[ -n "$p_db_name_override" ]]; then
-    DB_NAME="$p_db_name_override"
-  fi
-
-  u_db_clear
+  u_db_clear $2 $3
   u_db_import "$p_dump_file_path"
 }
 
@@ -568,24 +541,25 @@ u_db_restore() {
 # @see u_fs_get_most_recent()
 # @requires globals CWT_DB_DUMPS_BASE_PATH in calling scope.
 #
-# @param 1 [optional] String : $DB_NAME override.
+# @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 2 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   u_db_restore_last
-#   u_db_restore_last 'custom_db_name'
 #
 u_db_restore_last() {
-  u_db_restore "$(u_fs_get_most_recent $CWT_DB_DUMPS_BASE_PATH)" "$@"
+  u_db_restore "$(u_fs_get_most_recent $CWT_DB_DUMPS_BASE_PATH)" $@
 }
 
 ##
-# Creates a routine DB dump backup + progressively deletes old DB dumps.
+# Creates a routine DB dump backup.
 #
 # @requires globals CWT_DB_DUMPS_BASE_PATH in calling scope.
 #
-# @param 1 [optional] String : 'no-purge' to prevent automatic deletion of old
-#   backups.
-# @param 2 [optional] String : $DB_NAME override.
+# @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 2 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # NB : for performance reasons (to avoid using a subshell), this function
 # writes its result to a variable subject to collision in calling scope.
@@ -594,25 +568,16 @@ u_db_restore_last() {
 #
 # @example
 #   u_db_routine_backup
-#   u_db_routine_backup 'no-purge'
-#   u_db_routine_backup '' 'custom_db_name'
-#   u_db_routine_backup 'no-purge' 'custom_db_name'
 #
 u_db_routine_backup() {
-  local p_no_purge="$1"
-  local p_db_name_override="$2"
   local db_routine_new_backup_file
 
   # TODO [wip] Allow setting dump file extension in DB settings ?
   # Using generic extension 'dump' for now.
-  u_db_get_credentials
+  u_db_get_credentials $@
   db_routine_new_backup_file="$CWT_DB_DUMPS_BASE_PATH/local/$DB_ID/$(date +"%Y/%m/%d/%H-%M-%S").dump"
 
-  u_db_backup "$db_routine_new_backup_file"
-
-  # TODO [wip] unless 'no-purge' option is set, implement old dumps cleanup.
-  # If we had time, this could be implemented with something like :
-  # global CWT_DB_BAK_ROUTINE_PURGE "[default]='1m:5,3m:3,6m:2,1y:1' [help]='Custom syntax specifying how many dump files to keep by age. Comma-separated list of quotas - ex: 1m:5 = for backups older than 1 month, keep max 5 files in that month.'"
+  u_db_backup "$db_routine_new_backup_file" $@
 
   # Some tasks need the generated dump file path.
   routine_dump_file="${db_routine_new_backup_file}.tgz"
@@ -626,6 +591,9 @@ u_db_routine_backup() {
 # @param 1 [optional] String : pass 'new' to create new dump instead of
 #   returning most recent among existing local DB dump files.
 #   Pass 'initial' to get a dump file whose name matches 'initial.*'.
+# @param 2 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 3 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
 #
 # @example
 #   most_recent_dump_file="$(u_db_get_dump)"
@@ -644,7 +612,7 @@ u_db_get_dump() {
   if [[ -n "$p_option" ]]; then
     case "$p_option" in
       new)
-        u_db_routine_backup
+        u_db_routine_backup $2 $3
         dump_to_return="$routine_dump_file"
         ;;
       initial)
