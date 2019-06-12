@@ -71,7 +71,7 @@ services:
     depends_on:
       - "postgres"
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://$DB_USER:$DB_PASSWORD@$DB_HOST:5432/$DB_NAME
+      HASURA_GRAPHQL_DATABASE_URL: postgres://$DB_USER:$DB_PASS@$DB_HOST:5432/$DB_NAME
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: $HASURA_GRAPHQL_ADMIN_SECRET
     restart: on-failure:5
