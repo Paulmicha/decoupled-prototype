@@ -47,3 +47,5 @@ global ADMINER_TAG '4-3.5.12'
 
 # See https://github.com/hasura/graphql-engine/tree/master/install-manifests/docker-compose
 global HASURA_TAG 'v1.0.0-beta.2'
+
+global NGINX_VHOST_PRESET 'drupal8'
