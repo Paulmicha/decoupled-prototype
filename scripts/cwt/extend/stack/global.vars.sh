@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##
-# Stack-specific custom CWT globals for instances using docker-compose.
+# Stack-specific custom CWT globals.
 #
 # This file is used during "instance init" to generate the global environment
 # variables specific to current project instance.
@@ -44,3 +44,6 @@ global PHP_TAG '7.3-dev-4.12.12'
 global NGINX_TAG '1.17-5.5.0'
 global REDIS_TAG '4-3.0.8'
 global ADMINER_TAG '4-3.5.12'
+
+# See https://github.com/hasura/graphql-engine/tree/master/install-manifests/docker-compose
+global HASURA_TAG 'v1.0.0-beta.2'

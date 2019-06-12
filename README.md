@@ -29,12 +29,14 @@ Result (local dev defaults) :
   │   ├── extensions/   ← Generic CWT extensions (opt-out : see .cwt_extensions_ignore)
   │   └── ...
   ├── data/             ← [git-ignored] Local instance files (DB, sync, user uploads, etc.)
-  │   ├── db
+  │   ├── db/
   │   │   └── default/  ← Main database local bind mount
-  │   ├── db-dumps
+  │   ├── db-dumps/
   │   │   ├── ...       ← [optional] Downloaded remote DB dumps
   │   │   └── local/    ← Local DB dumps
-  │   └── files         ← Local user file uploads
+  │   ├── files/        ← Public file uploads
+  │   ├── private/      ← Private file uploads
+  │   └── tmp/          ← Temporary files for Drupal
   ├── scripts/          ← Current project specific scripts
   │   └── cwt/          ← CWT-related project-specific extension, local files and overrides
   │       ├── extend/   ← [optional] Custom project-specific CWT extension

@@ -15,7 +15,7 @@ global DRUPAL_VERSION "[default]=8"
 
 global DRUPAL_LOCAL_SETTINGS "[default]=$APP_DOCROOT/sites/default/settings.local.php"
 
-global DRUPAL_FILES_DIR "[default]=$APP_DOCROOT/sites/default/files"
+global DRUPAL_FILES_DIR "[default]=$PROJECT_DOCROOT/data/files"
 global DRUPAL_TMP_DIR "[default]=$PROJECT_DOCROOT/data/tmp"
 global DRUPAL_PRIVATE_DIR "[default]=$PROJECT_DOCROOT/data/private"
 

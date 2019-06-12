@@ -13,18 +13,18 @@
 # @see cwt/bootstrap.sh
 #
 
-# Path to public web directory (where index resides) inside web server + php
+# Path to public web directory (where index.php resides) inside web server + php
 # containers. Used in docker-compose.yml file.
-global APP_DOCROOT_C "[default]=/var/www/html"
+global APP_DOCROOT_C "[default]=/var/www/web"
 
-global DRUPAL_FILES_DIR_C "[default]=sites/default/files"
+global DRUPAL_FILES_DIR_C "[default]=/mnt/files/public"
 
 # These require matching volumes in docker-compose.yml for the 'php' container.
-global DRUPAL_TMP_DIR_C "[default]='/var/drupal-tmp'"
-global DRUPAL_PRIVATE_DIR_C "[default]='/var/drupal-private'"
+global DRUPAL_TMP_DIR_C "[default]='/mnt/files/tmp'"
+global DRUPAL_PRIVATE_DIR_C "[default]='/mnt/files/private'"
 
 # Default settings for commonly used Redis cache backend.
-global REDIS_CLIENT_HOST "${DWT_REDIS_SNAME:=redis}"
+global REDIS_CLIENT_HOST "${REDIS_SNAME:=redis}"
 global REDIS_CLIENT_PORT '6379'
 
 # Drupal settings specific to version 8+.

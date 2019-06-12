@@ -16,5 +16,5 @@
 
 # Redis container name is also necessary for default Drupal settings.
 # @see cwt/extensions/drupalwt/app/drupal_settings.7.tpl.php
-global DWT_PHP_SNAME "[default]=php"
-global DWT_REDIS_SNAME "[default]=redis"
+global PHP_SNAME "[default]=php"
+global REDIS_SNAME "[default]=redis"
