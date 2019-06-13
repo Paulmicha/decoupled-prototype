@@ -2,7 +2,7 @@
 
 🐉 WIP experiment using [CWT](https://github.com/Paulmicha/common-web-tools).
 
-Currently used as demo for [Contenta Sapper (Svelte JS)](https://github.com/Paulmicha/contenta_sapper).
+Currently used as demo dev stack for [Contenta Sapper (Svelte JS frontend + Drupal backend)](https://github.com/Paulmicha/contenta_sapper).
 
 ## Usage
 
@@ -18,6 +18,12 @@ Result (local dev defaults) :
 - Adminer (utility: DB UI) : http://localhost:9000
 - Mailhog (utility: email catcher) : http://localhost:8025
 - [Hasura](https://hasura.io/) (utility: GraphQL UI) : http://localhost:8080
+
+## Prerequisites
+
+Bash version 4+, Docker, docker-compose.
+
+Currently only tested on recent (mid-2019) Debian-based linux distros.
 
 ## Common tasks
 
