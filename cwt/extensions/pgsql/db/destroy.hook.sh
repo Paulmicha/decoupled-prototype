@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 ##
-# Implements u_hook_most_specific -s 'db' -a 'create' -v 'PROVISION_USING'.
+# Implements u_hook_most_specific -s 'db' -a 'destroy' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'.
 #
 # This file is dynamically included when the "hook" is triggered.
-# @see u_db_create() in cwt/extensions/db/db.inc.sh
+# @see u_db_destroy() in cwt/extensions/db/db.inc.sh
 #
 # The following variables are available here :
 #   - DB_ID - defaults to 'default'.
 #   - DB_DRIVER - defaults to 'mysql'.
 #   - DB_HOST - defaults to 'localhost'.
-#   - DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
+#   - DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'pgsql'.
 #   - DB_NAME - defaults to "$DB_ID".
 #   - DB_USER - defaults to first 16 characters of DB_ID.
 #   - DB_PASS - defaults to 14 random characters.
@@ -20,21 +20,21 @@
 # @see u_db_get_credentials() in cwt/extensions/db/db.inc.sh
 #
 # @example
-#   make db-create
+#   make db-destroy
 #   # Or :
-#   cwt/extensions/db/db/create.sh
+#   cwt/extensions/db/db/destroy.sh
 #
 
-echo "Creating $DB_ID $DB_DRIVER database '$DB_NAME' ..."
+echo "Destroying $DB_ID $DB_DRIVER database '$DB_NAME' ..."
 
 # PostgreSQL utilities use the environment variables supported by libpq.
 # See https://www.postgresql.org/docs/current/libpq-envars.html
 PGPASSWORD="$DB_PASS"
 
-createdb \
+dropdb \
   -U"$DB_USER" \
   -h"$DB_HOST" \
   -p"$DB_PORT" \
     "$DB_NAME"
 
-echo "Creating $DB_ID $DB_DRIVER database '$DB_NAME' : done."
+echo "Destroying $DB_ID $DB_DRIVER database '$DB_NAME' : done."

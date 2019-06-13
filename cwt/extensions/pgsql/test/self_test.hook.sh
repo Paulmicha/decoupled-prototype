@@ -3,7 +3,7 @@
 ##
 # Implements hook -s 'test' -a 'self_test' -v 'HOST_TYPE PROVISION_USING'.
 #
-# Verifies current instance can execute postgres actions normally.
+# Verifies current instance can execute pgsql actions normally.
 #
 # @see u_test_batch_exec() in cwt/test/test.inc.sh
 #
@@ -13,4 +13,4 @@
 #   cwt/test/self_test.sh
 #
 
-u_test_batch_exec 'cwt/extensions/postgres/test/self'
+u_test_batch_exec 'cwt/extensions/pgsql/test/self'

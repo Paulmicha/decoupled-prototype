@@ -42,10 +42,8 @@ global POSTGRES_TAG '11-1.6.3'
 global NODE_TAG '12-0.17.0'
 global PHP_TAG '7.3-dev-4.12.12'
 global NGINX_TAG '1.17-5.5.0'
+global NGINX_VHOST_PRESET 'drupal8'
 global REDIS_TAG '4-3.0.8'
 global ADMINER_TAG '4-3.5.12'
-
 # See https://github.com/hasura/graphql-engine/tree/master/install-manifests/docker-compose
 global HASURA_TAG 'v1.0.0-beta.2'
-
-global NGINX_VHOST_PRESET 'drupal8'

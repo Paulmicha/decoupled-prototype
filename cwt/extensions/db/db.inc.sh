@@ -13,7 +13,7 @@
 # @exports DB_ID - defaults to 'default'.
 # @exports DB_DRIVER - defaults to 'mysql'.
 # @exports DB_HOST - defaults to 'localhost'.
-# @exports DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
+# @exports DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'pgsql'.
 # @exports DB_NAME - defaults to "$DB_ID".
 # @exports DB_USER - defaults to first 16 characters of DB_ID.
 # @exports DB_PASS - defaults to 14 random characters.
@@ -97,7 +97,7 @@ u_db_get_credentials() {
     # These fallback values are provided if not set :
     # - $DB_DRIVER defaults to mysql
     # - $DB_HOST defaults to localhost
-    # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
+    # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'pgsql'
     # - $DB_ADMIN_USER defaults to $DB_USER
     # - $DB_ADMIN_PASS defaults to $DB_PASS
     # - $DB_TABLES_SKIP_DATA defaults to an empty string
@@ -110,7 +110,7 @@ u_db_get_credentials() {
       fi
       if [[ -z "$DB_PORT" ]]; then
         case "$DB_DRIVER" in
-          postgres) export DB_PORT='5432' ;;
+          pgsql) export DB_PORT='5432' ;;
           *)        export DB_PORT='3306' ;;
         esac
       fi
@@ -134,7 +134,7 @@ u_db_get_credentials() {
     # - $DB_NAME defaults to $DB_ID
     # - $DB_USER defaults to $DB_ID
     # - $DB_HOST defaults to localhost
-    # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'postgres'
+    # - $DB_PORT defaults to 3306 or 5432 if DB_DRIVER is 'pgsql'
     # - $DB_ADMIN_USER defaults to $DB_USER
     # - $DB_ADMIN_PASS defaults to $DB_PASS
     # - $DB_TABLES_SKIP_DATA defaults to an empty string
@@ -152,7 +152,7 @@ u_db_get_credentials() {
         # like "MySQL ERROR 1470 (HY000) String is too long for user name".
         # Warning : this creates naming collision risks (considered edge case).
         case "$DB_DRIVER" in
-          postgres) DB_USER="${DB_USER:0:32}" ;;
+          pgsql) DB_USER="${DB_USER:0:32}" ;;
           mysql)    DB_USER="${DB_USER:0:16}" ;;
         esac
       fi
@@ -161,7 +161,7 @@ u_db_get_credentials() {
       fi
       if [[ -z "$DB_PORT" ]]; then
         case "$DB_DRIVER" in
-          postgres) export DB_PORT='5432' ;;
+          pgsql) export DB_PORT='5432' ;;
           *)        export DB_PORT='3306' ;;
         esac
       fi
@@ -215,7 +215,7 @@ u_db_get_credentials() {
               ;;
             DB_PORT)
               val_default='3306'
-              case "$DB_DRIVER" in pgsql|postgres)
+              case "$DB_DRIVER" in pgsql)
                 val_default='5432'
               esac
               ;;
@@ -229,7 +229,7 @@ u_db_get_credentials() {
               # like "MySQL ERROR 1470 (HY000) String is too long for user name".
               # Warning : this creates naming collision risks (considered edge case).
               case "$DB_DRIVER" in
-                postgres) val_default="${val_default:0:32}" ;;
+                pgsql) val_default="${val_default:0:32}" ;;
                 mysql)    val_default="${val_default:0:16}" ;;
               esac
               ;;
@@ -273,10 +273,13 @@ u_db_get_credentials() {
 # "Abstract" means that this extension doesn't provide any actual implementation
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
+# @see cwt/extensions/pgsql
 #
-# To list all the possible paths that can be used - among which existing files
-# will be sourced when the hook is triggered, use :
-# $ make hook-debug ms s:db a:create v:PROVISION_USING
+# To list all the possible paths that can be used, use :
+# $ make hook-debug s:db a:create v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# To check the most specific match (if any is found) :
+# $ make hook-debug ms s:db a:create v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
 #
 # @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
 # @param 2 [optional] String : force reload flag (bypasses optimization) if the
@@ -296,6 +299,13 @@ u_db_create() {
 # "Abstract" means that this extension doesn't provide any actual implementation
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
+# @see cwt/extensions/pgsql
+#
+# To list all the possible paths that can be used, use :
+# $ make hook-debug s:db a:destroy v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# To check the most specific match (if any is found) :
+# $ make hook-debug ms s:db a:destroy v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
 #
 # @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
 # @param 2 [optional] String : force reload flag (bypasses optimization) if the
@@ -315,6 +325,13 @@ u_db_destroy() {
 # "Abstract" means that this extension doesn't provide any actual implementation
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
+# @see cwt/extensions/pgsql
+#
+# To list all the possible paths that can be used, use :
+# $ make hook-debug s:db a:import v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# To check the most specific match (if any is found) :
+# $ make hook-debug ms s:db a:import v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
 #
 # Important notes : implementations of the hook -s 'db' -a 'import' MUST use the
 # following variable in calling scope as input path (source file) :
@@ -405,7 +422,13 @@ u_db_import() {
 # "Abstract" means that this extension doesn't provide any actual implementation
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
-# @see cwt/extensions/postgres
+# @see cwt/extensions/pgsql
+#
+# To list all the possible paths that can be used, use :
+# $ make hook-debug s:db a:backup v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# To check the most specific match (if any is found) :
+# $ make hook-debug ms s:db a:backup v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
 #
 # Important notes : implementations of the hook -s 'db' -a 'backup' MUST use the
 # following variable in calling scope as output path (resulting file) :
@@ -496,6 +519,13 @@ u_db_backup() {
 # "Abstract" means that this extension doesn't provide any actual implementation
 # for this functionality. It is necessary to use an extension which does. E.g. :
 # @see cwt/extensions/mysql
+# @see cwt/extensions/pgsql
+#
+# To list all the possible paths that can be used, use :
+# $ make hook-debug s:db a:clear v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# To check the most specific match (if any is found) :
+# $ make hook-debug ms s:db a:clear v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
 #
 # @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
 # @param 2 [optional] String : force reload flag (bypasses optimization) if the

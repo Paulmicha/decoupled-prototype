@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##
-# Implements u_hook_most_specific -s 'db' -a 'backup' -v 'PROVISION_USING'
+# Implements u_hook_most_specific -s 'db' -a 'backup' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
 #
 # This file is dynamically included when the "hook" is triggered.
 # @see u_db_backup() in cwt/extensions/db/db.inc.sh
@@ -10,7 +10,7 @@
 #   - DB_ID - defaults to 'default'.
 #   - DB_DRIVER - defaults to 'mysql'.
 #   - DB_HOST - defaults to 'localhost'.
-#   - DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'postgres'.
+#   - DB_PORT - defaults to '3306' or '5432' if DB_DRIVER is 'pgsql'.
 #   - DB_NAME - defaults to "$DB_ID".
 #   - DB_USER - defaults to first 16 characters of DB_ID.
 #   - DB_PASS - defaults to 14 random characters.

@@ -3,7 +3,8 @@
 ##
 # Implements hook -s 'cwt' -a 'bootstrap' -v 'PROVISION_USING'.
 #
-# Declares default bash aliases for current project instance using postgres.
+# Declares default bash aliases for current project instance using a DB with
+# 'pgsql' as driver.
 #
 # This file is dynamically included when the "hook" is triggered.
 # @see cwt/bootstrap.sh
