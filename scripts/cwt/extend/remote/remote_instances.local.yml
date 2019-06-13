@@ -10,7 +10,7 @@ test:
   ssh_user: mo
   ssh_use_agent_filter: true
 
-prod:
+demo:
   host: decoupled-prototype.io
   docroot: /var/www/decoupled-prototype.io
   ssh_user: mo

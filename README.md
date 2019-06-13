@@ -2,6 +2,8 @@
 
 🐉 WIP experiment using [CWT](https://github.com/Paulmicha/common-web-tools).
 
+Currently used as demo for [Contenta Sapper (Svelte JS)](https://github.com/Paulmicha/contenta_sapper).
+
 ## Usage
 
 ```sh
@@ -17,13 +19,34 @@ Result (local dev defaults) :
 - Mailhog (utility: email catcher) : http://localhost:8025
 - [Hasura](https://hasura.io/) (utility: GraphQL UI) : http://localhost:8080
 
+## Common tasks
+
+This section will be progressively completed until the prototype gets "stable" (ish).
+
+### Apply changes made to any dev-stack settings / config
+
+Includes changes to global values, Drupal settings template, stack services...
+
+```sh
+scripts/reinit.sh
+```
+
+### Update CWT from upstream repo
+
+[CWT](https://github.com/Paulmicha/common-web-tools) is getting closer to stabilization, but it's not there yet. So when fixes are made upstream, upgrading locally can be done using :
+
+```sh
+make upgrade-cwt
+```
+
 ## File structure
 
 ```txt
 /path/to/my-project/    ← Dev stack dir ($PROJECT_DOCROOT)
-  ├── app/              ← The webapp separate Git repo ($APP_DOCROOT = $APP_GIT_WORK_TREE)
+  ├── app/              ← The webapp separate Git repo ($APP_GIT_WORK_TREE)
   │   ├── backend/      ← Contenta CMS Drupal distro
-  │   └── frontend/     ← Sapper NodeJS app
+  │   │   └── web/      ← Drupal webserver entry point ($APP_DOCROOT)
+  │   └── frontend/     ← Sapper (Svelte JS) NodeJS app
   ├── cwt/              ← CWT "core" source files. Update = delete + replace entire folder
   │   ├── ...
   │   ├── extensions/   ← Generic CWT extensions (opt-out : see .cwt_extensions_ignore)
