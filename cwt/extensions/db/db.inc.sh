@@ -153,7 +153,7 @@ u_db_get_credentials() {
         # Warning : this creates naming collision risks (considered edge case).
         case "$DB_DRIVER" in
           pgsql) DB_USER="${DB_USER:0:32}" ;;
-          mysql)    DB_USER="${DB_USER:0:16}" ;;
+          mysql) DB_USER="${DB_USER:0:16}" ;;
         esac
       fi
       if [[ -z "$DB_HOST" ]]; then
