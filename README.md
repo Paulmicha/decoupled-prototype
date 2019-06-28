@@ -47,29 +47,56 @@ make upgrade-cwt
 
 ## File structure
 
+General presentation & summary of where the relevant settings are coming from :
+
 ```txt
-/path/to/my-project/    ← Dev stack dir ($PROJECT_DOCROOT)
-  ├── app/              ← The webapp separate Git repo ($APP_GIT_WORK_TREE)
-  │   ├── backend/      ← Contenta CMS Drupal distro
-  │   │   └── web/      ← Drupal webserver entry point ($APP_DOCROOT)
-  │   └── frontend/     ← Sapper (Svelte JS) NodeJS app
-  ├── cwt/              ← CWT "core" source files. Update = delete + replace entire folder
+/path/to/my-project/          ← Dev stack dir ($PROJECT_DOCROOT)
+  ├── app/                    ← The webapp separate Git repo ($APP_GIT_WORK_TREE)
+  ├── cwt/                    ← CWT "core" source files
   │   ├── ...
-  │   ├── extensions/   ← Generic CWT extensions (opt-out : see .cwt_extensions_ignore)
+  │   ├── extensions/         ← Generic CWT extensions (opt-out : see .cwt_extensions_ignore)
+  │   │   ├── ...
+  │   │   ├── docker-compose/ ← Implements principal actions: (re)start, stop, (re)build, etc.
+  │   │   ├── drupalwt/
+  │   │   │   ├── app/
+  │   │   │   │   ├── drupal_settings.8.tpl.php         ← Default Drupal 8 settings template
+  │   │   │   │   ├── global.docker-compose.vars.sh     ← Drupal-specific env vars when using docker-compose
+  │   │   │   │   ├── global.vars.sh                    ← Default Drupal-specific env vars
+  │   │   │   │   └── ...
+  │   │   │   └── cwt/
+  │   │   │       ├── bootstrap.docker-compose.hook.sh  ← Drupal-specific bash aliases when using docker-compose
+  │   │   │       └── ...
+  │   │   └── ...
   │   └── ...
-  ├── data/             ← [git-ignored] Local instance files (DB, sync, user uploads, etc.)
+  ├── data/                   ← [git-ignored] Local instance files (DB, sync, user uploads, etc.)
   │   ├── db/
-  │   │   └── default/  ← Main database local bind mount
+  │   │   └── default/        ← Main database local bind mount
   │   ├── db-dumps/
-  │   │   ├── ...       ← [optional] Downloaded remote DB dumps
-  │   │   └── local/    ← Local DB dumps
-  │   ├── files/        ← Public file uploads
-  │   ├── private/      ← Private file uploads
-  │   └── tmp/          ← Temporary files for Drupal
-  ├── scripts/          ← Current project specific scripts
-  │   └── cwt/          ← CWT-related project-specific extension, local files and overrides
-  │       ├── extend/   ← [optional] Custom project-specific CWT extension
-  │       ├── local/    ← [git-ignored] Generated files specific to this local instance
-  │       └── override/ ← [optional] Allows to replace virtually any file sourced in CWT scripts
+  │   │   ├── ...             ← [optional] Downloaded remote DB dumps
+  │   │   └── local/          ← Local DB dumps
+  │   ├── files/              ← Public user uploaded files
+  │   ├── private/            ← Private file uploads
+  │   └── tmp/                ← Temporary files for Drupal
+  ├── scripts/
+  │   └── cwt/                ← Project-specific local files, extension and overrides
+  │       ├── extend/
+  │       │   ├── app/
+  │       │   │   └── global.vars.sh              ← Project-specific app-related env vars
+  │       │   ├── cwt/
+  │       │   │   └── bootstrap.hook.sh           ← Project-specific bash aliases
+  │       │   ├── remote/
+  │       │   │   └── remote_instances.local.yml  ← Remote instances setup (shared for team)
+  │       │   └── stack/
+  │       │       ├── docker-compose.override.dev.yml       ← Stack services overrides (* dev)
+  │       │       ├── docker-compose.override.local.dev.yml ← Stack services overrides (local dev)
+  │       │       ├── docker-compose.override.local.yml     ← Stack services overrides (local *)
+  │       │       ├── docker-compose.yml                    ← Default project stack services
+  │       │       └── global.vars.sh                        ← Project stack env vars
+  │       ├── local/          ← [git-ignored] Generated files specific to this local instance
+  │       └── override/
+  │           └── .cwt_extensions_ignore          ← Opt-out generic CWT extensions
+  ├── .env                            ← [git-ignored] Generated local env vars
+  ├── docker-compose.override.yml     ← [git-ignored] Generated local stack services overrides
+  ├── docker-compose.yml              ← [git-ignored] Generated local stack services setup
   └── .gitignore
 ```
