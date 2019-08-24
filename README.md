@@ -9,6 +9,9 @@ Currently used as demo dev stack for [Contenta Sapper (Svelte JS frontend + Drup
 ```sh
 scripts/init.sh && \
   make start
+
+# First time setup ? -> Run once upon creation of new local instance :
+make app-install
 ```
 
 Result (local dev defaults) :

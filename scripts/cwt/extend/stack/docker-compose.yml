@@ -78,7 +78,7 @@ services:
     labels:
       - 'traefik.backend=${DC_NS}_hasura'
       - 'traefik.port=8080'
-      - 'traefik.frontend.rule=Host:backend.${INSTANCE_DOMAIN}'
+      - 'traefik.frontend.rule=Host:hasura.${INSTANCE_DOMAIN}'
 
   # See https://github.com/wodby/postgres
   postgres:
