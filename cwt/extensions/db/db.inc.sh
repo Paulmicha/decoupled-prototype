@@ -23,10 +23,15 @@
 #
 # @requires the following globals in calling scope :
 # - INSTANCE_DOMAIN
-# - CWT_DB_IDS
 # - CWT_DB_MODE
 # - CWT_DB_DUMPS_BASE_PATH
 # @see cwt/extensions/db/global.vars.sh
+#
+# Uses the following env. var. if it is defined in current shell scope to select
+# which database credentials to load :
+# - CWT_DB_ID
+# This allows to operate on different databases from the same project instance.
+# See also the first parameter to this function documented below.
 #
 # If CWT_DB_MODE is set to 'auto' or 'manual', the first call to this function
 # will generate once the values for these globals.
@@ -35,6 +40,8 @@
 # @see cwt/instance/registry_get.sh
 #
 # @param 1 [optional] String : unique DB identifier. Defaults to 'default'.
+#   Important note : DB_ID values are restricted to alphanumerical characters
+#   and underscores (i.e. like variable names).
 # @param 2 [optional] String : force reload flag (bypasses optimization) if the
 #   DB credentials vars are already exported in current shell scope.
 #
@@ -43,7 +50,7 @@
 #   # depending on CWT_DB_MODE (see cwt/extensions/db/global.vars.sh).
 #   u_db_get_credentials
 #
-#   # Explicitly set DB_ID (TODO [wip] test multi-db projects).
+#   # Explicitly set DB_ID (TODO [wip] write tests for multi-db projects).
 #   # Alternatively, a local variable $CWT_DB_ID may be used in calling scope.
 #   u_db_get_credentials my_custom_db_id
 #   # Or :
@@ -76,6 +83,8 @@ u_db_get_credentials() {
     else
       db_id='default'
     fi
+  else
+    db_id="$p_db_id"
   fi
 
   u_str_sanitize_var_name "$db_id" 'db_id'
@@ -110,8 +119,8 @@ u_db_get_credentials() {
       fi
       if [[ -z "$DB_PORT" ]]; then
         case "$DB_DRIVER" in
-          pgsql) export DB_PORT='5432' ;;
-          *)        export DB_PORT='3306' ;;
+          pgsql)  export DB_PORT='5432' ;;
+          *)      export DB_PORT='3306' ;;
         esac
       fi
       if [[ -z "$DB_ADMIN_USER" ]]; then
@@ -161,8 +170,8 @@ u_db_get_credentials() {
       fi
       if [[ -z "$DB_PORT" ]]; then
         case "$DB_DRIVER" in
-          pgsql) export DB_PORT='5432' ;;
-          *)        export DB_PORT='3306' ;;
+          pgsql)  export DB_PORT='5432' ;;
+          *)      export DB_PORT='3306' ;;
         esac
       fi
       if [[ -z "$DB_TABLES_SKIP_DATA" ]]; then
@@ -229,8 +238,8 @@ u_db_get_credentials() {
               # like "MySQL ERROR 1470 (HY000) String is too long for user name".
               # Warning : this creates naming collision risks (considered edge case).
               case "$DB_DRIVER" in
-                pgsql) val_default="${val_default:0:32}" ;;
-                mysql)    val_default="${val_default:0:16}" ;;
+                pgsql)  val_default="${val_default:0:32}" ;;
+                mysql)  val_default="${val_default:0:16}" ;;
               esac
               ;;
             DB_PASS)
@@ -265,6 +274,46 @@ u_db_get_credentials() {
       done
     ;;
   esac
+}
+
+##
+# [abstract] Detects if a database already exists.
+#
+# "Abstract" means that this extension doesn't provide any actual implementation
+# for this functionality. It is necessary to use an extension which does. E.g. :
+# @see cwt/extensions/mysql
+# @see cwt/extensions/pgsql
+#
+# To list all the possible paths that can be used, use :
+# $ make hook-debug s:db a:exists v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# To check the most specific match (if any is found) :
+# $ make hook-debug ms s:db a:exists v:DB_DRIVER HOST_TYPE INSTANCE_TYPE
+#
+# @param 1 String : the database name to check.
+# @param 2 [optional] String : unique DB identifier. Defaults to 'default'.
+# @param 3 [optional] String : force reload flag (bypasses optimization) if the
+#   DB credentials vars are already exported in current shell scope.
+#
+# @example
+#   if u_db_exists 'my_db_name'; then
+#     echo "Ok, 'my_db_name' exists."
+#   else
+#     echo "Error : 'my_db_name' does not exist (or I do not have permission to access it)."
+#   fi
+#
+u_db_exists() {
+  local p_db_name="$1"
+  local db_exists=''
+
+  u_db_get_credentials "$2" "$3"
+  u_hook_most_specific -s 'db' -a 'exists' -v 'DB_DRIVER HOST_TYPE INSTANCE_TYPE'
+
+  case "$db_exists" in true)
+    return 1
+  esac
+
+  return 0
 }
 
 ##
@@ -614,7 +663,7 @@ u_db_routine_backup() {
 }
 
 ##
-# Gets local instance DB dump filepaths.
+# Gets local instance DB dump filepath.
 #
 # Optionally creates a new routine dump first.
 #
@@ -657,13 +706,7 @@ u_db_get_dump() {
     dump_to_return="$(u_fs_get_most_recent $CWT_DB_DUMPS_BASE_PATH)"
   fi
 
-  if [[ ! -f "$dump_to_return" ]]; then
-    echo >&2
-    echo "Error in u_db_get_dump() - $BASH_SOURCE line $LINENO: no DB dump file was found." >&2
-    echo "-> Aborting (1)." >&2
-    echo >&2
-    exit 1
+  if [[ -f "$dump_to_return" ]]; then
+    echo "$dump_to_return"
   fi
-
-  echo "$dump_to_return"
 }
